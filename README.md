@@ -1,5 +1,5 @@
 # gopherbb
-gopherbb is a simple easy to use forum framework written in Golang. It utilizes htmx on the frontend to maintain simpilicty and postgres as its dbms.
+gopherbb is a simple, easy to use forum framework written in Golang. It utilizes htmx on the frontend to maintain simplicity and postgres as its dbms.
 
 ## environment variables
 ```
