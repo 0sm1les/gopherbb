@@ -1,0 +1,37 @@
+{{ define "html/settings.html" }}
+<div class="center-x">
+    <div class="flex-container settings">
+        <form enctype="multipart/form-data" hx-post="/user/settings/pfp" hx-swap="innerHTML" hx-target="#pfp-form-feedback">
+            <fieldset>
+                <legend>Profile picture</legend>
+                <label>upload file
+                    <input type="file" name="pfp" accept="image/png, image/jpeg">
+                </label>
+                <input type="submit" value="set">
+                <div id="pfp-form-feedback"></div>
+            </fieldset>
+        </form>
+        <form hx-post="/user/settings/color" hx-swap="innerHTML" hx-target="#color-form-feedback">
+            <fieldset>
+                <legend>Username colors</legend>
+                <label>text color
+                    <input name="fg" type="color" value="#{{ .Userinfo.User_fg_color }}">
+                </label>
+                <label>shadow color
+                    <input name="bg" type="color" value="#{{ .Userinfo.User_bg_color }}">
+                </label>
+                <input type="submit" value="set">
+                <div id="color-form-feedback"></div>
+            </fieldset>
+        </form>
+        <form hx-post="/user/settings/bio" hx-swap="innerHTML" hx-target="#bio-form-feedback">
+            <fieldset>
+                <legend>Profile bio</legend>
+                <textarea name="profile-bio">{{ .Userinfo.Bio }}</textarea>
+                <input type="submit" value="set">
+                <div id="bio-form-feedback"></div>
+            </fieldset>
+        </form>
+    </div>
+</div>
+{{ end }}

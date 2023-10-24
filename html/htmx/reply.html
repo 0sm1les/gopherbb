@@ -1,0 +1,11 @@
+{{ define "html/htmx/reply.html" }}
+{{ if and .Pid .Cid }}
+<form hx-post="/reply/{{ .Pid }}/comment/{{ .Cid }}">
+{{ else }}
+<form hx-post="/reply/{{ .Pid }}">
+{{ end }}
+    <textarea name="comment"></textarea>
+    <button>submit</button>
+    <button onclick="this.parentElement.remove()">cancel</button>
+</form>
+{{ end }}

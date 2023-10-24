@@ -1,0 +1,495 @@
+:root {
+    
+    --primary:black;
+    --primary2:black;
+    --primary3:black;
+    --primary4:black;
+
+    --seconday:white;
+    --seconday2:white;
+    --seconday3:white;
+
+    --affirm: rgb(114, 255, 114);
+    --danger: rgb(228, 83, 78);
+  }
+
+  @font-face {
+    font-family: droidsansmono;
+    src: url(DroidSansMono.ttf);
+}
+
+* {
+    font-family: droidsansmono;
+}
+
+body {
+    margin:0;
+    padding:0;
+    background-color: var(--secondary);
+}
+
+html {
+   overflow-x: hidden;
+  }
+
+
+fieldset {
+    border: 1px solid var(--primary3);
+}
+
+label {
+    color: var(--primary2);
+}
+
+input,select {
+    background-color: var(--secondary2);
+    border: none;
+    outline: none;
+}
+
+select {
+    border-bottom: 1px solid var(--primary2);
+}
+
+select, option {
+    background-color: var(--secondary2);
+    color: var(--primary2);
+}
+
+
+input[type="text"],
+input[type="password"] {
+    min-width: 16em;
+    border-bottom: 1px solid var(--primary2);
+    color: var(--primary2)
+}
+
+input[type="text"]:active,
+input[type="password"]:active,
+input[type="text"]:focus,
+input[type="password"]:focus {
+    border-bottom: 1px solid var(--primary);
+    color: var(--primary);
+}
+
+input[type="submit"] {
+    margin-top: 0.5em;
+    margin-bottom: 0.5em;
+    color: var(--primary2);
+    box-shadow: 0.1em 0.1em 0 0 var(--primary2);
+    box-shadow: 0.1em 0.1em 0 0 var(--primary2);
+}
+
+input[type="submit"]:hover {
+    color: var(--primary);
+    box-shadow: 0.1em 0.1em 0 0 var(--primary);
+}
+
+input[type="submit"]:active {
+    box-shadow: none;
+    position: relative;
+    top:0.1em;
+    left:0.1em;
+}
+
+input,
+button,
+select {
+    padding: 0.3em;
+}
+
+button {
+    background-color: var(--secondary2);
+    border-color: var(--primary2);
+    border-width: 0.1em;
+    color: var(--primary2);
+    padding: 0.3em;
+}
+
+a {
+    color: var(--primary2);
+    text-decoration: none;
+}
+
+a:hover {
+    color: var(--primary);
+}
+
+legend {
+    color: var(--primary);
+}
+
+body {
+    margin-top: 60px;
+}
+
+.main-nav nav {
+    position: fixed;
+    top:0;
+    padding: 0.5em 1em;
+    background-color: var(--secondary2);
+    width:100%;
+    border-bottom: 1px solid var(--primary3);
+}
+
+.main-nav h2 {
+    display: inline;
+}
+
+.main-nav nav li {
+    display: inline;
+}
+
+.main-nav a {
+    font-size: larger;
+    padding: 0.4em;
+}
+
+.center-x {
+    display: flex;
+    justify-content: center;
+}
+
+.center {
+    height: 80vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.auth-form label input {
+    display: block;
+}
+
+.auth-form input {
+    padding: 0.5em 1em;
+    margin-top: 0.2em;
+    margin-bottom:0.2em;
+}
+
+.auth-form fieldset {
+    padding: 3em;
+}
+
+.error {
+    font-size: 75%;
+    color: red;
+}
+
+.profile_pic .resizable-image {
+    max-width: 100%;
+    max-height: 100%;
+    width: auto;
+    height: auto;
+  }
+
+.profile .date {
+    color: var(--primary2);
+}
+
+.profile .username {
+    font-size: larger;
+}
+
+.profile .profile_pic {
+    width: 200px;
+    height: 200px;
+    border: 2px solid var(--primary);
+}
+.profile .contacts {
+    border: 1px solid var(--primary2);
+    width: calc(200px + 3px);
+}
+
+.profile .contacts label {
+    margin-left:1em;
+    color: var(--primary);
+}
+.profile .contacts input {
+    margin-left:1em;
+    color: var(--primary2);
+    display: block;
+}
+
+.profile .bio {
+    color: var(--primary);
+    max-height: 40%;
+    display: block;
+}
+.profile .bio pre {
+    border: 1px solid var(--primary);
+    height: 100%;
+}
+
+.profile .bio code {
+    height: 100%;
+}
+
+.profile .flex-container {
+    width: auto;
+    height: 80vh;
+    display: inline-flex;
+    padding: 1em;
+    margin: 1em;
+    border: 1px solid var(--primary3);
+}
+
+.flex-container-row {
+    display: flex;
+    flex-direction: row;
+}
+
+.flex-container {
+    display: flex;
+    flex-direction: column;
+    width: 50em;
+}
+
+.settings input {
+    display: block;
+}
+
+.editor-container {
+    margin: 1em;
+    display: flex;
+    gap:1em 1em;
+    flex-direction: row;
+}
+
+.editor-item {
+    margin: 0;
+    padding: 0;
+    height: 80vh;
+    width: 50%;
+    border: 1px solid var(--secondary3);
+    overflow: scroll;
+    overflow-wrap: break-word;
+}
+
+textarea {
+    margin: 0;
+    padding: 1em;
+    border: none;
+    resize: none;
+    outline: none;
+    user-select: none;
+    -webkit-box-shadow: none;
+    -moz-box-shadow: none;
+    box-shadow: none;
+    background-color: var(--secondary2);
+    color: var(--secondary3);
+}
+
+.editor-item textarea {
+    width: calc(100% - 2em);
+    max-width: calc(100% - 2em);
+    height: calc(100% - 2em);
+    max-height: calc(100% - 2em);
+}
+
+.section-directory div {
+    border: 1px solid var(--primary3);
+    margin-top: 1em;
+    margin-bottom: 1em;
+    padding: 0;
+}
+
+.section-directory h2 {
+    color: var(--primary);
+    border-bottom: 1px solid var(--primary3);
+    background-color: var(--secondary2);
+    padding: 0.2em 0.5em;
+    margin-top: 0;
+    margin-bottom: 0;
+}
+
+.section-directory span {
+    float: right;
+    color: var(--primary3);
+}
+
+.section-directory a {
+    padding: 0.2em 0.5em;
+}
+
+
+.dropdown {
+    position: relative;
+    display: inline-block;
+  }
+  
+.dropdown-content {
+    display: none;
+    position: absolute;
+    background-color: var(--secondary2);
+    min-width: fit-content;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    z-index: 1;
+  }
+  
+.dropdown-content a {
+    color: var(--primary2);
+    font-size: smaller;
+    text-decoration: none;
+    display: block;
+  }
+  
+.dropdown-content a:hover {
+    color: var(--primary);
+}
+  
+.dropdown:hover .dropdown-content {
+    display: block;
+}
+
+.post-container {
+    border-bottom: none;
+    margin-top: 1em;
+    margin-bottom: 1em;
+    padding: 0;
+}
+
+.post-container h2 {
+    color: var(--primary);
+}
+
+.post-container button {
+    background-color: var(--secondary);
+}
+
+.post-listing {
+    border-bottom:1px solid var(--primary3);
+    padding: 0.2em 0.5em;
+}
+  
+.post-listing h3,
+.post-listing h5 {
+    margin: 0;
+    padding: 0;
+}
+
+.post-listing h3 {
+    color: var(--primary2);
+}
+
+.post-listing h5 {
+    color: var(--primary3)
+}
+
+.post {
+    border: 1px solid var(--primary3);
+    margin-top: 1em;
+    margin-bottom: 1em;
+    padding: 0;
+    overflow: scroll;
+    overflow-wrap: break-word;
+}
+
+.post * {
+    margin-left: 10px;
+    margin-right: 10px;
+}
+
+.post h1,
+.post h2,
+.post h3,
+.post h4,
+.post h5,
+.post h6 {
+    color: var(--primary);
+}
+
+.post p,
+.post li {
+    color: var(--primary2);
+}
+
+.post strong,
+.post em {
+    color: var(--primary);
+}
+
+.post hr {
+    color: var(--primary3);
+}
+
+pre {
+    color: var(--primary4);
+    background-color: var(--secondary2);
+    padding: 0.5em;
+    overflow: scroll;
+}
+
+.thread-container h1,
+.thread-container h2,
+.thread-container h3,
+.thread-container h4,
+.thread-container h5,
+.thread-container h6 {
+    margin-top: 0;
+    margin-bottom: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+
+    color: var(--primary);
+}
+
+.thread-container .post {
+    margin: 0;
+}
+
+.reply form {
+    margin-top: 1em;
+    margin-bottom: 1em;
+}
+
+.reply textarea {
+    border: 1px solid var(--primary);
+    width: 100%;
+    box-sizing: border-box;
+    display: block;
+}
+
+.reply button {
+    display: inline;
+}
+
+.notification div,
+.notification h2 {
+    color: var(--primary);
+
+}
+
+.search input[type="text"] {
+    width: 90%;
+}
+
+.search input[type="submit"] {
+    float: right;
+    position: relative;
+    margin: 0;
+}
+
+.search h1 {
+    color: var(--primary);
+}
+
+footer {
+    font-size: smaller;
+    position:fixed;
+    bottom:0;
+    left:0;
+    height: 2em;
+}
+
+.message {
+    font-size: smaller;
+}
+
+.affirm {
+    color: var(--affirm);
+}
+
+.danger {
+    color: var(--danger);
+}

@@ -1,0 +1,7 @@
+{{ define "html/htmx/form_feedback.html" }}
+    {{ if eq .Result "ok" }}
+    <div class="affirm message">{{ .Message }}</div>
+    {{ else }}
+    <div class="danger message">{{ .Message }}</div>
+    {{ end }}
+{{ end }}

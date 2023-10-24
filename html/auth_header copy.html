@@ -1,0 +1,32 @@
+{{ define "html/auth_header.html" }}
+<!DOCTYPE HTML>
+<html>
+<head>
+    <title>{{ .Title }}</title>
+    <link rel="stylesheet" href="/custom.css">
+    <script src="https://unpkg.com/htmx.org@1.9.6" integrity="sha384-FhXw7b6AlE/jyjlZH5iHa/tTe9EpJ1Y55RjcgPbjeWMskSxZt1v9qkxLJWNJaGni" crossorigin="anonymous"></script>
+</head>
+    <header>
+        <div class="main-nav">
+        <nav>
+            <li><a href="/">home</a></li>
+            <li><a href="/search">search</a></li>
+            <li><a href="/donate">donate</a></li>
+            <li><a href="/rules">rules</a></li>
+            <li>
+            <div class="dropdown">
+                    <a href="/user/{{ .Userinfo.Username }}"><span style="color: #{{ .Userinfo.User_fg_color }}; text-shadow: 1px 1px 5px #{{ .Userinfo.User_bg_color }};">{{ .Userinfo.Username }}</span></a>
+                    <div class="dropdown-content">
+                        <a href="/user/likes">likes</a>
+                        <a href="/user/notifications">notifications</a>
+                        <a href="/user/{{ .Userinfo.Username }}/posts">posts</a>
+                        <a href="/user/drafts">drafts</a>
+                        <a href="/user/settings">settings</a>
+                        <a href="/logout">logout</a>
+                    </div>
+                  </div> 
+            </li>
+        </nav>
+        </div>
+    </header>
+{{ end }}

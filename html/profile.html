@@ -1,0 +1,33 @@
+{{ define "html/profile.html" }}
+<body>
+<div class="profile">
+    <div class="flex-container-row">
+        <div class="flex-container">
+            <div class="profile_pic">
+                <img class="resizable-image" src="/pictures/{{ .Userinfo.Profile_pic }}">
+            </div>
+            {{ if or (eq .Userinfo.Role "unranked") (eq .Userinfo.Role "ranked") }}
+            <div class="username" style="color: #{{ .Userinfo.User_fg_color }}; text-shadow: 1px 1px 5px #{{ .Userinfo.User_bg_color }};">{{ .Userinfo.Username }}</div>
+            {{ else }}
+            <div><span style="color: red;">[{{ .Userinfo.Role }}] </span><span class="username" style="color: #{{ .Userinfo.User_fg_color }}; text-shadow: 1px 1px 5px #{{ .Userinfo.User_bg_color }};">{{ .Userinfo.Username }}</span></div>
+            {{ end }}
+            <div class="date">Joined: {{ .Userinfo.Date_formatted }}</div>
+        </div>
+        
+        <div class="flex-container" style="width: 100%;">
+            <div class="bio">Bio:
+                <code><pre>{{ .Userinfo.Bio }}</pre></code>
+                Recent Posts:
+                {{ range .RecentPosts }}
+                <div class="post-listing">
+                    <h3><a href="/section/{{ .Section }}/{{ .Pid }}/{{ .Title }}">{{ .Title }}</a></h3>
+                    <h5>By:<span style="color: #{{ .User.User_fg_color }}; text-shadow: 1px 1px 5px #{{ .User.User_bg_color }};" >{{ .User.Username }}</span> On:{{ .Time_formatted }}</h5>
+                </div>
+                {{ end }}
+                <a href="/user/{{ .Userinfo.Username }}/posts">View all</a>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+{{ end }}

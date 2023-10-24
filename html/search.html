@@ -1,0 +1,18 @@
+{{ define "html/search.html" }}
+<body>
+    <div class="content">
+<div class="center-x">
+    <div class="flex-container search">
+        <h1>search</h1>
+        <form hx-get="/search" hx-swap="innerHTML" hx-target="#results">
+            <input type="text" name="search" required>
+            <input type="submit" value="search">
+        </form>
+        <div id="results">
+
+        </div>
+    </div>
+    </div>
+    </div>
+</body>
+{{ end }}

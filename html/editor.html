@@ -1,0 +1,138 @@
+{{ define "html/editor.html" }}
+<body>
+<div class="editor-container">
+    <button id="save">save</button>
+    <button id="preview">preview</button>
+    {{ if eq .Postinfo.Status "posted"}}
+    <button hx-get="/delete/post/{{ .Postinfo.Pid }}" hx-confirm="Are you sure you wish to delete this post?">delete</button>
+    {{ else}}
+    <button id="post">post</button>
+    {{ end}}
+    <form>
+    <label>title
+        {{ if .Postinfo }}
+        <input name="title" id="title" type="text" value="{{ .Postinfo.Title }}" required>
+        {{ else }}
+        <input name="title" id="title" type="text" required>
+        {{ end}}
+    </label>
+    <label>section
+
+        <select name="section" id="section" required>
+        {{ range .Categories }}
+            {{ range .Sections }}
+                {{ if eq $.Postinfo.Section .Id }}
+                <option id="{{ .Id }}" value="{{ .Id }}" selected="selected">{{ .Section }}</option>
+                {{ else }}
+                <option id="{{ .Id }}" value="{{ .Id }}">{{ .Section }}</option>
+                {{ end }}
+            {{ end }}
+        {{ end }}
+        </select>
+    </label>
+    </form>
+</div>
+
+<div class="editor-container">
+    {{ if .Postinfo }}
+    <div class="editor-item"><textarea id="md-editor">{{ .Postinfo.Md }}</textarea></div>
+    <div class="editor-item post" style="margin: 0;" id="html-preview">{{ .PostHTML }}</div>
+    {{ else }}
+        <div class="editor-item"><textarea id="md-editor"></textarea></div>
+        <div class="editor-item post" style="margin: 0;" id="html-preview"></div>
+    {{ end }}
+</div>
+
+
+<script>
+    const save = document.getElementById("save");
+    const preview = document.getElementById("preview");
+    const post = document.getElementById("post");
+    const title = document.getElementById("title");
+    const section = document.getElementById("section");
+
+    const editor = document.getElementById("md-editor");
+    const html_preview = document.getElementById("html-preview");
+
+
+    preview.addEventListener("click", function() {
+        var raw_md = editor.value;
+        var html = postMD(raw_md, "/editor/render");
+        html.then(value => {
+        console.log('Resolved Value:', value);
+        html_preview.innerHTML = value;
+        })
+    });
+
+    save.addEventListener("click", function() {
+        if (title.value === "" ) {
+            title.style.border = "1px solid red";
+        } else {
+            title.style.border = null;
+            var raw_md = editor.value;
+            var path = window.location.pathname + "/save/"
+            console.log(path);
+            var pid = postMD(raw_md, path, title.value, section.value)
+            pid.then(value => {
+                console.log('Resolved Value:', value);
+                var test = JSON.parse(value);
+                console.log(test.pid);
+                if (test.pid !== undefined && test.pid !== null) {
+                    window.location.pathname = window.location.pathname + "/" + test.pid;
+                };
+                html_preview.innerHTML = test.html;
+
+            })
+        }
+    });
+
+    post.addEventListener("click", function() {
+        if (title.value === "" ) {
+            title.style.border = "1px solid red";
+        } else {
+            title.style.border = null;
+            var raw_md = editor.value;
+            var path = window.location.pathname + "/post"
+            console.log(path);
+            var pid = postMD(raw_md, path, title.value, section.value)
+            pid.then(value => {
+                console.log('Resolved Value:', value);
+                var test = JSON.parse(value);
+                console.log(test.pid);
+                window.location.pathname = "/section/" + test.section + "/"+ test.pid + "/" + test.title
+            })
+        }
+    });
+
+    function postMD(mdValue, url, title, section) {
+        if (title !== undefined && section !== undefined) {
+            data = {
+            md: mdValue,
+            title: title,
+            section: section
+        };
+        } else {
+            data = {
+            md: mdValue
+        };
+    };
+
+        const requestOptions = {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        };
+
+        return fetch(url, requestOptions)
+        .then(response => {
+            if (!response.ok) {
+            throw new Error('Network response was not ok');
+            }
+            return response.text();
+        });
+    };
+</script>
+</body>
+{{ end }}

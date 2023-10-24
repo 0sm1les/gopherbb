@@ -1,0 +1,18 @@
+{{ define "html/section.html" }}
+<body>
+<div class="center-x">
+    <div class="flex-container post-container">
+        <h2>{{ .Section }}</h2>
+        {{ if .Logged_in }}
+        <a href="/editor">new post</a>
+        {{ end }}
+        {{ range .Posts }}
+        <div class="post-listing">
+            <h3><a href="/section/{{ $.Section }}/{{ .Pid }}/{{ .Title }}">{{ .Title }}</a></h3>
+            <h5>By:<a href="/user/{{ .User.Username }}"><span style="color: #{{ .User.User_fg_color }}; text-shadow: 1px 1px 5px #{{ .User.User_bg_color }};" >{{ .User.Username }}</span></a> On: {{ .Time_formatted }}</h5>
+        </div>
+        {{ end }}
+    </div>
+</div>
+</body>
+{{ end }}

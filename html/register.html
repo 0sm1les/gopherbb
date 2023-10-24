@@ -1,0 +1,24 @@
+{{ define "html/register.html" }}
+<div class="center">
+<div class="auth-form">
+    <form action="/register" method="post">
+        <fieldset>
+        <label>username
+        <input name="username" id="username" type="text" minlength="3" maxlength="16" required>
+    </label>
+        <label>password
+        <input name="password" id="password" type="password" minlength="8" maxlength="255" required>
+    </label>
+        <label>confirm password
+        <input name="confirm_password" id="confirm_password" type="password" minlength="8" maxlength="255" required>
+    </label>
+        <input type="submit" value="register">
+        {{ range .Errors }}
+        <div class="error">{{ . }}</div>
+        {{end}}
+        </fieldset>
+        <a href="/login">login</a>
+    </form>
+    </div>
+    </div>
+{{ end }}

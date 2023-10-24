@@ -1,0 +1,23 @@
+{{ define "html/user-posts.html" }}
+<div class="center-x">
+<div class="flex-container post-container">
+    <h2>{{ .Status }}</h2>
+    {{ if eq .Status "Drafts" }}
+    <a href="/editor">new post</a>
+    {{ end }}
+    {{ if eq .Status "Posts" }}
+    <a href="/editor">new post</a>
+    {{ end }}
+    {{ range .Posts }}
+    <div class="post-listing">
+        {{ if eq .Status "draft" }}
+        <h3><a href="/editor/{{ .Pid }}">{{ .Title }}</a></h3>
+        {{ else }}
+        <h3><a href="/section/{{ .Section }}/{{ .Pid }}/{{ .Title }}">{{ .Title }}</a></h3>
+        {{ end }}
+        <h5>By:<a href="/user/{{ .User.Username }}"><span style="color: #{{ .User.User_fg_color }}; text-shadow: 1px 1px 5px #{{ .User.User_bg_color }};" >{{ .User.Username }}</span></a> On:{{ .Time_formatted }}</h5>
+    </div>
+    {{ end }}
+</div>
+</div>
+{{ end }}

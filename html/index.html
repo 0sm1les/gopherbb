@@ -1,0 +1,16 @@
+{{ define "html/index.html" }}
+<body>
+<div class="center-x">
+    <div class="section-directory">
+    {{ range .Categories }}
+    <div class="flex-container">
+    <h2>{{ .Category }}</h2>
+    {{ range .Sections }}
+    <a href="/section/{{ .Id }}">{{ .Section }}</a>
+    {{ end }}
+    </div>
+    {{ end }}
+    </div>
+</div>
+</body>
+{{ end }}

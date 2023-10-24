@@ -1,0 +1,21 @@
+{{ define "html/unauth_header.html"}}
+<!DOCTYPE HTML>
+<html>
+<head>
+    <title>{{ .Title }}</title>
+    <link rel="stylesheet" href="/custom.css">
+    <script src="https://unpkg.com/htmx.org@1.9.6" integrity="sha384-FhXw7b6AlE/jyjlZH5iHa/tTe9EpJ1Y55RjcgPbjeWMskSxZt1v9qkxLJWNJaGni" crossorigin="anonymous"></script>
+</head>
+    <header>
+        <div class="main-nav">
+        <nav>
+            <li><a href="/">home</a></li>
+            <li><a href="/search">search</a></li>
+            <li><a href="/donate">donate</a></li>
+            <li><a href="/rules">rules</a></li>
+            <li><a href="/login">login</a></li>
+            <li><a href="/register">register</a></li>
+        </nav>
+        </div>
+    </header>
+{{ end }}

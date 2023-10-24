@@ -1,0 +1,53 @@
+{{ define "html/post.html" }}
+<div class="center-x">
+    <div class="flex-container" style="width: 50%;">
+        <div class="thread-container">
+            <div class="post-container">
+            <h1>{{ .Postinfo.Title }}</h1>
+            <h5>By:<a href="/user/{{ .User.Username }}"><span style="color: #{{ .User.User_fg_color }}; text-shadow: 1px 1px 5px #{{ .User.User_bg_color }};" >{{ .User.Username }}</span></a> On:{{ .Postinfo.Time_formatted }}</h5>
+            <div class="post">
+            {{ .Postinfo.Html }}
+            </div>
+            <div></div>
+            {{ if .Logged_in}}
+            <div>
+                {{ if .Liked }}
+                <button id="like-button" hx-get="/like/{{ .Postinfo.Pid }}" hx-swap="none">unlike</button>
+                {{ else }}
+                <button id="like-button" hx-get="/like/{{ .Postinfo.Pid }}" hx-swap="none">like</button>
+                {{ end }}
+                <button hx-get="/reply/{{ .Postinfo.Pid }}" hx-target="#post-{{ .Postinfo.Pid }}" hx-swap="innerHTML">reply</button>
+                {{ if .Editable }}
+                <button><a href="/editor/{{ .Postinfo.Pid }}">edit</a></button>
+                {{ end }}
+            </div>
+            <div id="post-{{ .Postinfo.Pid }}" class="reply"></div>
+            {{ end }}
+            </div>
+            <h1>Comments:</h1>
+            {{ range .Comments }}
+            <div class="post-container">
+            <h4><a href="/user/{{ .User.Username }}"><span style="color: #{{ .User.User_fg_color }}; text-shadow: 1px 1px 5px #{{ .User.User_bg_color }};" >{{ .User.Username }}</span></a></h4>
+            <div class="post">{{ .Html }}</div>
+                {{ if $.Logged_in }}
+                <div>
+                    <button hx-get="/reply/{{ .Parent_post }}/comment/{{ .Cid }}" hx-target="#comment-{{ .Cid }}" hx-swap="innerHTML">reply</button>
+                </div>
+                <div id="comment-{{ .Cid }}" class="reply"></div>
+                {{ end }}
+            </div>
+            {{ end }}
+        </div>
+    </div>
+</div>
+<script>
+    const likeBtn = document.getElementById("like-button");
+    likeBtn.addEventListener("click", function() {
+        if (likeBtn.innerText === "like") {
+            likeBtn.innerText = "unlike";
+        } else if (likeBtn.innerText === "unlike") {
+            likeBtn.innerText = "like";
+        }
+    })
+</script>
+{{ end }}

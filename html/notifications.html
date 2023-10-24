@@ -1,0 +1,12 @@
+{{ define "html/notifications.html" }}
+<div class="center-x">
+    <div class="flex-container notification">
+        <h2>Notifications</h2>
+{{ range .Notifications }}
+        <div><a href="/user/{{ .From_Uid_Listing.Username }}"><span style="color: #{{ .From_Uid_Listing.User_fg_color }}; text-shadow: 1px 1px 5px #{{ .From_Uid_Listing.User_bg_color }};" >{{ .From_Uid_Listing.Username }}</span></a>
+        {{ .Message }}
+        </div>
+{{ end }}
+</div>
+</div>
+{{ end }}
