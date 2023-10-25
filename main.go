@@ -647,7 +647,6 @@ func post(c *gin.Context) {
 	if uid != -1 {
 		var post models.Post
 		var buf bytes.Buffer
-		var pid int32
 		var err error
 
 		if err := c.ShouldBindJSON(&post); err != nil {
@@ -667,11 +666,12 @@ func post(c *gin.Context) {
 		}
 
 		if c.Param("id") == "" {
-			pid, err = querydb.NewPost(uid, section.Id, "posted", post.Title, post.Md, buf.String())
+			pid, err := querydb.NewPost(uid, section.Id, "posted", post.Title, post.Md, buf.String())
 			if err != nil {
 				log.Error().Err(err)
 				return
 			}
+			c.JSON(200, gin.H{"pid": pid, "section": section.Id, "title": post.Title})
 		} else {
 			pid, err := strconv.ParseInt(c.Param("id"), 10, 32)
 			if err != nil {
@@ -699,9 +699,8 @@ func post(c *gin.Context) {
 				log.Error().Err(err)
 				return
 			}
-
+			c.JSON(200, gin.H{"pid": pid, "section": section.Id, "title": post.Title})
 		}
-		c.JSON(200, gin.H{"pid": pid, "section": section.Id, "title": post.Title})
 	}
 }
 
