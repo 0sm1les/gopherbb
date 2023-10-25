@@ -9,7 +9,7 @@
     <label>password
         <input name="password" id="password" type="password" minlength="8" maxlength="255" required>
     </label>
-    <input type="submit" value="login">
+    <button>login</button>
     {{ range .Errors }}
     <div class="error">{{ . }}</div>
     {{end}}

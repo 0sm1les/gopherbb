@@ -47,6 +47,7 @@ CREATE TABLE comments (
     poster int references users(id) NOT NULL,
     parent_post int references posts(id) NOT NULL,
     parent_comment int,
+    status varchar(8) CHECK (status in ('posted', 'deleted')) DEFAULT 'posted' NOT NULL,
     md TEXT NOT NULL,
     html TEXT NOT NULL,
     time_posted timestamp without time zone NOT NULL

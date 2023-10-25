@@ -26,14 +26,17 @@
             </div>
             <h1>Comments:</h1>
             {{ range .Comments }}
-            <div class="post-container">
+            <div id="comment-{{ .Cid }}" class="post-container">
             <h4><a href="/user/{{ .User.Username }}"><span style="color: #{{ .User.User_fg_color }}; text-shadow: 1px 1px 5px #{{ .User.User_bg_color }};" >{{ .User.Username }}</span></a></h4>
             <div class="post">{{ .Html }}</div>
                 {{ if $.Logged_in }}
                 <div>
-                    <button hx-get="/reply/{{ .Parent_post }}/comment/{{ .Cid }}" hx-target="#comment-{{ .Cid }}" hx-swap="innerHTML">reply</button>
+                    <button hx-get="/reply/{{ .Parent_post }}/comment/{{ .Cid }}" hx-target="#comment-{{ .Cid }}-reply" hx-swap="innerHTML">reply</button>
+                    {{ if eq .User_id $.User.Id }}
+                        <button hx-get="/delete/reply/{{ .Cid }}" hx-confirm="are you sure you want to delete this comment?" hx-target="#comment-{{ .Cid }}" hx-swap="outerHTML">delete</button>
+                    {{ end }}
                 </div>
-                <div id="comment-{{ .Cid }}" class="reply"></div>
+                <div id="comment-{{ .Cid }}-reply" class="reply"></div>
                 {{ end }}
             </div>
             {{ end }}
@@ -49,5 +52,7 @@
             likeBtn.innerText = "like";
         }
     })
+
+
 </script>
 {{ end }}

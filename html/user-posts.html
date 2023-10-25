@@ -5,9 +5,6 @@
     {{ if eq .Status "Drafts" }}
     <a href="/editor">new post</a>
     {{ end }}
-    {{ if eq .Status "Posts" }}
-    <a href="/editor">new post</a>
-    {{ end }}
     {{ range .Posts }}
     <div class="post-listing">
         {{ if eq .Status "draft" }}

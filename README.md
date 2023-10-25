@@ -11,6 +11,7 @@ gopherbb_postgres_addr
 gopherbb_postgres_creds
 gopherbb_postgres_db
 gopherbb_salt
+gopherbb_console_log
 ```
 
 ## config example
@@ -60,5 +61,4 @@ The theme can be easily adjusted by changing the 7 color variables in the css fi
 The default user name colors can be changed by editing the user table in gopherbb.sql, default username colors are black.
 
 ## TODO
-- bug in /user/:user/posts
 - refine css for chrome

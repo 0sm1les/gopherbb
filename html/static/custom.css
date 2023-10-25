@@ -5,9 +5,9 @@
     --primary3:black;
     --primary4:black;
 
-    --seconday:white;
-    --seconday2:white;
-    --seconday3:white;
+    --secondary:white;
+    --secondary2:white;
+    --secondary3:white;
 
     --affirm: rgb(114, 255, 114);
     --danger: rgb(228, 83, 78);
@@ -113,6 +113,8 @@ a {
 
 a:hover {
     color: var(--primary);
+    background-color: var(--primary);
+    background: rgba(0,0,0, 0.1);
 }
 
 legend {
@@ -130,6 +132,7 @@ body {
     background-color: var(--secondary2);
     width:100%;
     border-bottom: 1px solid var(--primary3);
+    /*z-index: -1;*/
 }
 
 .main-nav h2 {
@@ -256,6 +259,10 @@ body {
     flex-direction: row;
 }
 
+.editor-container div {
+    border: 1px solid var(--primary3);
+}
+
 .editor-item {
     margin: 0;
     padding: 0;
@@ -265,7 +272,7 @@ body {
     overflow: scroll;
     overflow-wrap: break-word;
 }
-
+/*
 textarea {
     margin: 0;
     padding: 1em;
@@ -279,8 +286,17 @@ textarea {
     background-color: var(--secondary2);
     color: var(--secondary3);
 }
+*/
+textarea {
+    outline: none;
+    user-select: none;
+}
 
 .editor-item textarea {
+    margin: 0;
+    padding: 1em;
+    resize: none;
+    border: none;
     width: calc(100% - 2em);
     max-width: calc(100% - 2em);
     height: calc(100% - 2em);
@@ -324,7 +340,7 @@ textarea {
     background-color: var(--secondary2);
     min-width: fit-content;
     box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
-    z-index: 1;
+    /*z-index: 1;*/
   }
   
 .dropdown-content a {
@@ -442,7 +458,7 @@ pre {
     margin-top: 1em;
     margin-bottom: 1em;
 }
-
+.settings textarea,
 .reply textarea {
     border: 1px solid var(--primary);
     width: 100%;

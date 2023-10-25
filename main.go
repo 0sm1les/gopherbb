@@ -36,6 +36,8 @@ var Sections = make(map[string]string)
 
 var md = goldmark.New(goldmark.WithExtensions(extension.GFM))
 
+var logger zerolog.Logger
+
 func main() {
 	zerolog.TimeFieldFormat = zerolog.TimeFormatUnix
 	log.Logger = log.With().Caller().Logger()
@@ -50,7 +52,6 @@ func main() {
 		log.Fatal().Err(err)
 	}
 	defer mainLog.Close()
-	zerolog.New(mainLog)
 
 	gopherbb_gin_log_file, supplied := os.LookupEnv("gopherbb_gin_log")
 	if !supplied {
@@ -63,43 +64,54 @@ func main() {
 		log.Fatal().Err(err)
 	}
 	defer ginLog.Close()
-	gin.DefaultWriter = io.MultiWriter(ginLog)
-	//gin.DefaultWriter = io.MultiWriter(os.Stdout)
+
+	consoleLog, _ := os.LookupEnv("gopherbb_console_log")
+	if consoleLog == "false" {
+		log.Info().Msg(fmt.Sprintf("printing logs to files: %s, %s", gopherbb_main_log_file, gopherbb_gin_log_file))
+		logger = zerolog.New(mainLog).With().Caller().Logger()
+		gin.DefaultWriter = io.MultiWriter(ginLog)
+	} else if consoleLog == "true" {
+		log.Info().Msg("printing log to console")
+		logger = zerolog.New(os.Stdout).With().Caller().Logger()
+		gin.DefaultWriter = io.MultiWriter(os.Stdout)
+	} else {
+		log.Fatal().Msg("env variable 'gopherbb_console_log' is not supplied or incorrect")
+	}
 
 	file_cf, supplied := os.LookupEnv("gopherbb_conf")
 	if !supplied {
-		log.Fatal().Msg("env variable 'gopherbb_conf' is not set")
+		logger.Fatal().Msg("env variable 'gopherbb_conf' is not set")
 	}
 	readConf(file_cf)
 
 	salt, supplied := os.LookupEnv("gopherbb_salt")
 	if !supplied {
-		log.Fatal().Msg("env variable 'gopherbb_salt' is not set")
+		logger.Fatal().Msg("env variable 'gopherbb_salt' is not set")
 	}
 	auth.SetSalt(salt)
 
 	_, supplied = os.LookupEnv("gopherbb_cookie_key")
 	if !supplied {
-		log.Fatal().Msg("env variable 'gopherbb_cookie_key' is not set")
+		logger.Fatal().Msg("env variable 'gopherbb_cookie_key' is not set")
 	}
 
 	pg_creds, supplied := os.LookupEnv("gopherbb_postgres_creds")
 	if !supplied {
-		log.Fatal().Msg("env variable 'gopherbb_postgres_creds' is not set")
+		logger.Fatal().Msg("env variable 'gopherbb_postgres_creds' is not set")
 	}
 
 	pg_addr, supplied := os.LookupEnv("gopherbb_postgres_addr")
 	if !supplied {
-		log.Fatal().Msg("env variable 'gopherbb_postgres_addr' is not set")
+		logger.Fatal().Msg("env variable 'gopherbb_postgres_addr' is not set")
 	}
 
 	pg_db, supplied := os.LookupEnv("gopherbb_postgres_db")
 	if !supplied {
-		log.Fatal().Msg("env variable 'gopherbb_postgres_db' is not set")
+		logger.Fatal().Msg("env variable 'gopherbb_postgres_db' is not set")
 	}
 
 	if err := querydb.Connect(pg_creds, pg_addr, pg_db); err != nil {
-		log.Fatal().Err(err)
+		logger.Fatal().Err(err)
 	}
 
 	router := gin.Default()
@@ -140,7 +152,8 @@ func main() {
 	router.POST("/editor/post", post)
 	router.POST("/editor/:id/post", post)
 
-	router.GET("/delete/post/:pid", delete)
+	router.GET("/delete/post/:pid", deletePost)
+	router.GET("/delete/reply/:cid", deleteReply)
 
 	router.GET("/section/:section", section)
 	router.GET("/section/:section/:id/:title", viewPost)
@@ -315,7 +328,7 @@ func register(c *gin.Context) {
 				if querydb.UserExists(verified_user) == -1 {
 					err = querydb.CreateUser(verified_user, auth.Hashpassword(verified_pass))
 					if err != nil {
-						log.Error().Err(err)
+						logger.Error().Err(err)
 						return
 					}
 					html := template.Must(template.ParseFiles("html/unauth_header.html", "html/login.html", "html/footer.html"))
@@ -353,31 +366,31 @@ func profile(c *gin.Context) {
 	if uid != -1 {
 		user, err := auth.ValidateUser(c.Param("user"))
 		if err != nil {
-			log.Error().Err(err)
+			logger.Error().Err(err)
 			return
 		}
 
 		userinfo, err := querydb.Userinfo(uid)
 		if err != nil {
-			log.Error().Err(err)
+			logger.Error().Err(err)
 		}
 
 		if other_uid := querydb.UserExists(user); other_uid != -1 {
 			other_userinfo, err := querydb.Userinfo(other_uid)
 			if err != nil {
-				log.Error().Err(err)
+				logger.Error().Err(err)
 			}
 
 			other_userinfo.Date_formatted = other_userinfo.Date_Joined.Format("2006-02-02")
 
 			userlisted, err := querydb.GetUser(other_uid)
 			if err != nil {
-				log.Error().Err(err)
+				logger.Error().Err(err)
 			}
 
 			posts, err := querydb.RecentUserPosts(other_uid)
 			if err != nil {
-				log.Error().Err(err)
+				logger.Error().Err(err)
 			}
 			for i := 0; i < len(posts); i++ {
 				posts[i].User = userlisted
@@ -385,9 +398,9 @@ func profile(c *gin.Context) {
 			}
 
 			html := template.Must(template.ParseFiles("html/auth_header.html", "html/profile.html", "html/footer.html"))
-			err = html.ExecuteTemplate(c.Writer, "html/auth_header.html", gin.H{"Title": other_userinfo.Username, "Userinfo": userinfo})
-			err = html.ExecuteTemplate(c.Writer, "html/profile.html", gin.H{"Userinfo": other_userinfo, "RecentPosts": posts})
-			err = html.ExecuteTemplate(c.Writer, "html/footer.html", nil)
+			html.ExecuteTemplate(c.Writer, "html/auth_header.html", gin.H{"Title": other_userinfo.Username, "Userinfo": userinfo})
+			html.ExecuteTemplate(c.Writer, "html/profile.html", gin.H{"Userinfo": other_userinfo, "RecentPosts": posts})
+			html.ExecuteTemplate(c.Writer, "html/footer.html", nil)
 		}
 
 	} else {
@@ -403,7 +416,7 @@ func settings(c *gin.Context) {
 		if c.Request.Method == "GET" {
 			userinfo, err := querydb.Userinfo(uid)
 			if err != nil {
-				log.Error().Err(err)
+				logger.Error().Err(err)
 			}
 
 			html := template.Must(template.ParseFiles("html/auth_header.html", "html/settings.html", "html/footer.html"))
@@ -414,7 +427,7 @@ func settings(c *gin.Context) {
 			if c.Param("setting") == "pfp" {
 				pfp, err := c.FormFile("pfp")
 				if err != nil {
-					log.Error().Err(err)
+					logger.Error().Err(err)
 					return
 				}
 				if pfp.Size > 500000 {
@@ -458,28 +471,28 @@ func settings(c *gin.Context) {
 				fg = strings.Replace(fg, "#", "", 1)
 				bg = strings.Replace(bg, "#", "", 1)
 				if _, err := hex.DecodeString(fg); err != nil || len(fg) != 6 {
-					log.Error().Err(err)
+					logger.Error().Err(err)
 					html := template.Must(template.ParseFiles("html/htmx/form_feedback.html"))
 					html.ExecuteTemplate(c.Writer, "html/htmx/form_feedback.html", gin.H{"Result": "error", "Message": "invalid color format"})
 					return
 				}
 
 				if _, err := hex.DecodeString(bg); err != nil || len(bg) != 6 {
-					log.Error().Err(err)
+					logger.Error().Err(err)
 					html := template.Must(template.ParseFiles("html/htmx/form_feedback.html"))
 					html.ExecuteTemplate(c.Writer, "html/htmx/form_feedback.html", gin.H{"Result": "error", "Message": "invalid color format"})
 					return
 				}
 
 				if err := querydb.SetColor(uid, "fg", fg); err != nil {
-					log.Error().Err(err)
+					logger.Error().Err(err)
 					html := template.Must(template.ParseFiles("html/htmx/form_feedback.html"))
 					html.ExecuteTemplate(c.Writer, "html/htmx/form_feedback.html", gin.H{"Result": "error", "Message": "error setting colors"})
 					return
 				}
 
 				if err := querydb.SetColor(uid, "bg", bg); err != nil {
-					log.Error().Err(err)
+					logger.Error().Err(err)
 					html := template.Must(template.ParseFiles("html/htmx/form_feedback.html"))
 					html.ExecuteTemplate(c.Writer, "html/htmx/form_feedback.html", gin.H{"Result": "error", "Message": "error setting colors"})
 					return
@@ -493,7 +506,7 @@ func settings(c *gin.Context) {
 				bio := c.PostForm("profile-bio")
 				err := querydb.SetBio(uid, bio)
 				if err != nil {
-					log.Error().Err(err)
+					logger.Error().Err(err)
 					html := template.Must(template.ParseFiles("html/htmx/form_feedback.html"))
 					html.ExecuteTemplate(c.Writer, "html/htmx/form_feedback.html", gin.H{"Result": "error", "Message": "error updating bio"})
 					return
@@ -514,7 +527,7 @@ func editor(c *gin.Context) {
 
 		userinfo, err := querydb.Userinfo(uid)
 		if err != nil {
-			log.Error().Err(err)
+			logger.Error().Err(err)
 			return
 		}
 
@@ -528,18 +541,18 @@ func editor(c *gin.Context) {
 
 			pid, err := strconv.ParseInt(c.Param("id"), 10, 32)
 			if err != nil {
-				log.Error().Err(err)
+				logger.Error().Err(err)
 				return
 			}
 
 			postinfo, err := querydb.GetPost(int32(pid))
 			if err != nil {
-				log.Error().Err(err)
+				logger.Error().Err(err)
 				return
 			}
 
 			if postinfo.Uid != uid {
-				log.Error().Err(errors.New("user tried to access unauthorized resource"))
+				logger.Error().Err(errors.New("user tried to access unauthorized resource"))
 				return
 			}
 
@@ -562,12 +575,12 @@ func render(c *gin.Context) {
 		var raw_md models.Post
 		var buf bytes.Buffer
 		if err := c.ShouldBindJSON(&raw_md); err != nil {
-			log.Error().Err(err)
+			logger.Error().Err(err)
 			return
 		}
 
 		if err := md.Convert([]byte(raw_md.Md), &buf); err != nil {
-			log.Error().Err(err)
+			logger.Error().Err(err)
 			return
 		}
 		c.String(200, buf.String())
@@ -586,19 +599,19 @@ func save(c *gin.Context) {
 		var buf bytes.Buffer
 
 		if err := c.ShouldBindJSON(&post); err != nil {
-			log.Error().Err(err)
+			logger.Error().Err(err)
 			return
 		}
 
 		section, err := validateSection(post.Section)
 		if err != nil {
-			log.Error().Err(err)
+			logger.Error().Err(err)
 			return
 		}
 
 		//compile html
 		if err := md.Convert([]byte(post.Md), &buf); err != nil {
-			log.Error().Err(err)
+			logger.Error().Err(err)
 			return
 		}
 
@@ -606,7 +619,7 @@ func save(c *gin.Context) {
 		if c.Param("id") == "" {
 			pid, err := querydb.NewPost(uid, section.Id, "draft", post.Title, post.Md, buf.String())
 			if err != nil {
-				log.Error().Err(err)
+				logger.Error().Err(err)
 				return
 			}
 			c.JSON(200, gin.H{"pid": pid, "html": buf.String()})
@@ -616,23 +629,23 @@ func save(c *gin.Context) {
 
 			pid, err := strconv.ParseInt(c.Param("id"), 10, 32)
 			if err != nil {
-				log.Error().Err(err)
+				logger.Error().Err(err)
 				return
 			}
 			poster, _, _, err := querydb.GetPostOP(int32(pid))
 			if err != nil {
-				log.Error().Err(err)
+				logger.Error().Err(err)
 				return
 			}
 
 			if poster != uid {
-				log.Error().Err(errors.New("user tried to access unauthorized resource"))
+				logger.Error().Err(errors.New("user tried to access unauthorized resource"))
 				return
 			}
 
 			err = querydb.UpdatePost(int32(pid), post.Title, post.Md, buf.String(), section.Id)
 			if err != nil {
-				log.Error().Err(err)
+				logger.Error().Err(err)
 				return
 			}
 			c.JSON(200, gin.H{"html": buf.String()})
@@ -650,53 +663,53 @@ func post(c *gin.Context) {
 		var err error
 
 		if err := c.ShouldBindJSON(&post); err != nil {
-			log.Error().Err(err)
+			logger.Error().Err(err)
 			return
 		}
 
 		section, err := validateSection(post.Section)
 		if err != nil {
-			log.Error().Err(err)
+			logger.Error().Err(err)
 			return
 		}
 
 		if err := md.Convert([]byte(post.Md), &buf); err != nil {
-			log.Error().Err(err)
+			logger.Error().Err(err)
 			return
 		}
 
 		if c.Param("id") == "" {
 			pid, err := querydb.NewPost(uid, section.Id, "posted", post.Title, post.Md, buf.String())
 			if err != nil {
-				log.Error().Err(err)
+				logger.Error().Err(err)
 				return
 			}
 			c.JSON(200, gin.H{"pid": pid, "section": section.Id, "title": post.Title})
 		} else {
 			pid, err := strconv.ParseInt(c.Param("id"), 10, 32)
 			if err != nil {
-				log.Error().Err(err)
+				logger.Error().Err(err)
 				return
 			}
 			poster, _, _, err := querydb.GetPostOP(int32(pid))
 			if err != nil {
-				log.Error().Err(err)
+				logger.Error().Err(err)
 				return
 			}
 
 			if poster != uid {
-				log.Error().Err(errors.New("user tried to access unauthorized resource"))
+				logger.Error().Err(errors.New("user tried to access unauthorized resource"))
 				return
 			}
 
 			err = querydb.UpdatePost(int32(pid), post.Title, post.Md, buf.String(), section.Id)
 			if err != nil {
-				log.Error().Err(err)
+				logger.Error().Err(err)
 				return
 			}
 			err = querydb.UpdatePostStatus(int32(pid), "posted")
 			if err != nil {
-				log.Error().Err(err)
+				logger.Error().Err(err)
 				return
 			}
 			c.JSON(200, gin.H{"pid": pid, "section": section.Id, "title": post.Title})
@@ -711,7 +724,7 @@ func posts(c *gin.Context) {
 	if uid != -1 {
 		userinfo, err := querydb.Userinfo(uid)
 		if err != nil {
-			log.Error().Err(err)
+			logger.Error().Err(err)
 			return
 		}
 		user := c.Param("user")
@@ -719,13 +732,13 @@ func posts(c *gin.Context) {
 
 		userListed, err := querydb.GetUser(user_id)
 		if err != nil {
-			log.Error().Err(err)
+			logger.Error().Err(err)
 			return
 		}
 
-		posts, err := querydb.UserPosts(uid, "posted")
+		posts, err := querydb.UserPosts(user_id, "posted")
 		if err != nil {
-			log.Error().Err(err)
+			logger.Error().Err(err)
 			return
 		}
 
@@ -749,19 +762,19 @@ func drafts(c *gin.Context) {
 	if uid != -1 {
 		userinfo, err := querydb.Userinfo(uid)
 		if err != nil {
-			log.Error().Err(err)
+			logger.Error().Err(err)
 			return
 		}
 
 		userListed, err := querydb.GetUser(uid)
 		if err != nil {
-			log.Error().Err(err)
+			logger.Error().Err(err)
 			return
 		}
 
 		posts, err := querydb.UserPosts(uid, "draft")
 		if err != nil {
-			log.Error().Err(err)
+			logger.Error().Err(err)
 			return
 		}
 
@@ -785,20 +798,20 @@ func section(c *gin.Context) {
 
 	section, err := validateSection(c.Param("section"))
 	if err != nil {
-		log.Error().Err(err)
+		logger.Error().Err(err)
 		return
 	}
 
 	posts, err := querydb.GetSectionPosts(section.Id)
 	if err != nil {
-		log.Error().Err(err)
+		logger.Error().Err(err)
 		return
 	}
 
 	for i := 0; i < len(posts); i++ {
 		posts[i].User, err = querydb.GetUser(posts[i].Uid)
 		if err != nil {
-			log.Error().Err(err)
+			logger.Error().Err(err)
 			return
 		}
 
@@ -808,7 +821,7 @@ func section(c *gin.Context) {
 	if uid != -1 {
 		userinfo, err := querydb.Userinfo(uid)
 		if err != nil {
-			log.Error().Err(err)
+			logger.Error().Err(err)
 			return
 		}
 
@@ -831,13 +844,13 @@ func viewPost(c *gin.Context) {
 
 	pid, err := strconv.ParseInt(c.Param("id"), 10, 32)
 	if err != nil {
-		log.Error().Err(err)
+		logger.Error().Err(err)
 		return
 	}
 
 	postinfo, err := querydb.GetPost(int32(pid))
 	if err != nil {
-		log.Error().Err(err)
+		logger.Error().Err(err)
 		return
 	}
 
@@ -845,19 +858,19 @@ func viewPost(c *gin.Context) {
 
 	userlisted, err := querydb.GetUser(postinfo.Uid)
 	if err != nil {
-		log.Error().Err(err)
+		logger.Error().Err(err)
 		return
 	}
 
 	comments, err := querydb.GetComments(postinfo.Pid)
 	if err != nil {
-		log.Error().Err(err)
+		logger.Error().Err(err)
 		return
 	}
 	for i := 0; i < len(comments); i++ {
 		comments[i].User, err = querydb.GetUser(comments[i].User_id)
 		if err != nil {
-			log.Error().Err(err)
+			logger.Error().Err(err)
 			return
 		}
 	}
@@ -866,16 +879,15 @@ func viewPost(c *gin.Context) {
 
 		userinfo, err := querydb.Userinfo(uid)
 		if err != nil {
-			log.Error().Err(err)
+			logger.Error().Err(err)
 			return
 		}
 
 		liked, _ := querydb.Liked(uid, postinfo.Pid)
-
 		html := template.Must(template.ParseFiles("html/auth_header.html", "html/post.html", "html/footer.html"))
 		html.ExecuteTemplate(c.Writer, "html/auth_header.html", gin.H{"Title": postinfo.Title, "Userinfo": userinfo})
 		html.ExecuteTemplate(c.Writer, "html/post.html", gin.H{"Postinfo": postinfo,
-			"User":      userlisted,
+			"User":      userinfo,
 			"Comments":  comments,
 			"Liked":     liked,
 			"Logged_in": true,
@@ -904,7 +916,7 @@ func reply(c *gin.Context) {
 		pid, err := strconv.ParseInt(c.Param("pid"), 10, 32)
 
 		if err != nil {
-			log.Error().Err(err)
+			logger.Error().Err(err)
 			return
 		}
 
@@ -912,7 +924,7 @@ func reply(c *gin.Context) {
 			cid, err = strconv.ParseInt(c.Param("cid"), 10, 32)
 
 			if err != nil {
-				log.Error().Err(err)
+				logger.Error().Err(err)
 				return
 			}
 		}
@@ -933,51 +945,51 @@ func reply(c *gin.Context) {
 
 			OP, section, title, err := querydb.GetPostOP(int32(pid))
 			if err != nil {
-				log.Error().Err(err)
+				logger.Error().Err(err)
 				return
 			}
 			if cid == 0 {
 
 				if err := md.Convert([]byte(comment), &buf); err != nil {
-					log.Error().Err(err)
+					logger.Error().Err(err)
 					return
 				}
 
 				_, err = querydb.PostComment(uid, int32(pid), -1, comment, buf.String())
 				if err != nil {
-					log.Error().Err(err)
+					logger.Error().Err(err)
 					return
 				}
 				if OP != uid {
 					err = querydb.NewNotification(OP, uid, fmt.Sprintf(`Left a comment on your post <a href="/section/%s/%d/%s">%s</a>`, section, pid, title, title))
 					if err != nil {
-						log.Error().Err(err)
+						logger.Error().Err(err)
 						return
 					}
 				}
 
 			} else if cid != 0 {
 				if err := md.Convert([]byte(comment), &buf); err != nil {
-					log.Error().Err(err)
+					logger.Error().Err(err)
 					return
 				}
 
 				_, err = querydb.PostComment(uid, int32(pid), int32(cid), comment, buf.String())
 				if err != nil {
-					log.Error().Err(err)
+					logger.Error().Err(err)
 					return
 				}
 
 				comment_poster, err := querydb.GetCommentPoster(int32(cid))
 				if err != nil {
-					log.Error().Err(err)
+					logger.Error().Err(err)
 					return
 				}
 
 				if comment_poster != uid {
 					err = querydb.NewNotification(comment_poster, uid, fmt.Sprintf(`Responsed to your comment on <a href="/section/%s/%d/%s">%s</a>`, section, pid, title, title))
 					if err != nil {
-						log.Error().Err(err)
+						logger.Error().Err(err)
 						return
 					}
 				}
@@ -995,12 +1007,12 @@ func like(c *gin.Context) {
 	if uid != -1 {
 		pid, err := strconv.ParseInt(c.Param("pid"), 10, 32)
 		if err != nil {
-			log.Error().Err(err)
+			logger.Error().Err(err)
 			return
 		}
 		err = querydb.LikeUnlike(uid, int32(pid))
 		if err != nil {
-			log.Error().Err(err)
+			logger.Error().Err(err)
 			return
 		}
 	}
@@ -1013,20 +1025,20 @@ func likes(c *gin.Context) {
 	if uid != -1 {
 		userinfo, err := querydb.Userinfo(uid)
 		if err != nil {
-			log.Error().Err(err)
+			logger.Error().Err(err)
 			return
 		}
 
 		posts, err := querydb.Likes(uid)
 		if err != nil {
-			log.Error().Err(err)
+			logger.Error().Err(err)
 			return
 		}
 
 		for i := 0; i < len(posts); i++ {
 			posts[i].User, err = querydb.GetUser(posts[i].Uid)
 			if err != nil {
-				log.Error().Err(err)
+				logger.Error().Err(err)
 				return
 			}
 			posts[i].Time_formatted = posts[i].Time_posted.Format("2006-02-02")
@@ -1046,20 +1058,20 @@ func notifications(c *gin.Context) {
 	if uid != -1 {
 		userinfo, err := querydb.Userinfo(uid)
 		if err != nil {
-			log.Error().Err(err)
+			logger.Error().Err(err)
 			return
 		}
 
 		notifications, err := querydb.Notifications(uid)
 		if err != nil {
-			log.Error().Err(err)
+			logger.Error().Err(err)
 			return
 		}
 
 		for i := 0; i < len(notifications); i++ {
 			notifications[i].From_Uid_Listing, _ = querydb.GetUser(notifications[i].From_Uid)
 			if err != nil {
-				log.Error().Err(err)
+				logger.Error().Err(err)
 				return
 			}
 		}
@@ -1081,7 +1093,7 @@ func search(c *gin.Context) {
 		if uid != -1 {
 			userinfo, err := querydb.Userinfo(uid)
 			if err != nil {
-				log.Error().Err(err)
+				logger.Error().Err(err)
 				return
 			}
 			html := template.Must(template.ParseFiles("html/auth_header.html", "html/search.html", "html/footer.html"))
@@ -1099,14 +1111,14 @@ func search(c *gin.Context) {
 	} else if qry != "" {
 		posts, err := querydb.Search(qry)
 		if err != nil {
-			log.Error().Err(err)
+			logger.Error().Err(err)
 			return
 		}
 
 		for i := 0; i < len(posts); i++ {
 			posts[i].User, err = querydb.GetUser(posts[i].Uid)
 			if err != nil {
-				log.Error().Err(err)
+				logger.Error().Err(err)
 				return
 			}
 
@@ -1118,36 +1130,62 @@ func search(c *gin.Context) {
 	}
 }
 
-func delete(c *gin.Context) {
+func deletePost(c *gin.Context) {
 	initsession(c)
 	session, _ := store.Get(c.Request, "session")
 	uid := session.Values["id"].(int32)
 	if uid != -1 {
 		pid, err := strconv.ParseInt(c.Param("pid"), 10, 32)
 		if err != nil {
-			log.Error().Err(err)
+			logger.Error().Err(err)
 			return
 		}
 
 		userlisted, err := querydb.GetUser(uid)
 		if err != nil {
-			log.Error().Err(err)
+			logger.Error().Err(err)
 			return
 		}
 
 		postop, _, _, err := querydb.GetPostOP(int32(pid))
 		if err != nil {
-			log.Error().Err(err)
+			logger.Error().Err(err)
 			return
 		}
 
 		if postop == uid {
 			err = querydb.DeletePost(int32(pid))
 			if err != nil {
-				log.Error().Err(err)
+				logger.Error().Err(err)
 				return
 			}
 			c.Header("HX-Redirect", fmt.Sprintf("/user/%s/posts", userlisted.Username))
+		}
+	}
+}
+
+func deleteReply(c *gin.Context) {
+	initsession(c)
+	session, _ := store.Get(c.Request, "session")
+	uid := session.Values["id"].(int32)
+	if uid != -1 {
+		cid, err := strconv.ParseInt(c.Param("cid"), 10, 32)
+		if err != nil {
+			logger.Error().Err(err)
+			return
+		}
+
+		commentPost, err := querydb.GetCommentPoster(int32(cid))
+		if err != nil {
+			logger.Error().Err(err)
+			return
+		}
+		if commentPost == uid {
+			err = querydb.DeleteReply(int32(cid))
+			if err != nil {
+				logger.Error().Err(err)
+				return
+			}
 		}
 	}
 }

@@ -7,7 +7,7 @@
                 <label>upload file
                     <input type="file" name="pfp" accept="image/png, image/jpeg">
                 </label>
-                <input type="submit" value="set">
+                <button>set</button>
                 <div id="pfp-form-feedback"></div>
             </fieldset>
         </form>
@@ -20,7 +20,7 @@
                 <label>shadow color
                     <input name="bg" type="color" value="#{{ .Userinfo.User_bg_color }}">
                 </label>
-                <input type="submit" value="set">
+                <button>set</button>
                 <div id="color-form-feedback"></div>
             </fieldset>
         </form>
@@ -28,7 +28,7 @@
             <fieldset>
                 <legend>Profile bio</legend>
                 <textarea name="profile-bio">{{ .Userinfo.Bio }}</textarea>
-                <input type="submit" value="set">
+                <button>set</button>
                 <div id="bio-form-feedback"></div>
             </fieldset>
         </form>

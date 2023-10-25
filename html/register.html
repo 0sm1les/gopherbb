@@ -12,7 +12,7 @@
         <label>confirm password
         <input name="confirm_password" id="confirm_password" type="password" minlength="8" maxlength="255" required>
     </label>
-        <input type="submit" value="register">
+        <button>register</button>
         {{ range .Errors }}
         <div class="error">{{ . }}</div>
         {{end}}

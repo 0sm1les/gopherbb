@@ -215,7 +215,7 @@ func PostComment(user_id int32, parent_post int32, comment_post int32, md string
 
 func GetComments(post_id int32) ([]models.Comment, error) {
 	var comments []models.Comment
-	results, err := dbpool.Query(context.Background(), "SELECT id, poster, parent_post, parent_comment, html, time_posted FROM comments WHERE parent_post = $1", post_id)
+	results, err := dbpool.Query(context.Background(), "SELECT id, poster, parent_post, parent_comment, html, time_posted FROM comments WHERE parent_post = $1 AND status = $2", post_id, "posted")
 	if err != nil {
 		return nil, err
 	}
@@ -333,5 +333,10 @@ func Search(search_qry string) ([]models.PostListing, error) {
 
 func DeletePost(pid int32) error {
 	_, err := dbpool.Exec(context.Background(), "UPDATE posts SET status = $1 WHERE id = $2", "deleted", pid)
+	return err
+}
+
+func DeleteReply(cid int32) error {
+	_, err := dbpool.Exec(context.Background(), "UPDATE comments SET status = $1 WHERE id = $2", "deleted", cid)
 	return err
 }
