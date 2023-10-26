@@ -1,16 +1,54 @@
 {{ define "html/index.html" }}
 <body>
-<div class="center-x">
-    <div class="section-directory">
-    {{ range .Categories }}
-    <div class="flex-container">
-    <h2>{{ .Category }}</h2>
-    {{ range .Sections }}
-    <a href="/section/{{ .Id }}">{{ .Section }}</a>
-    {{ end }}
+    <!--
+    <div style="flex-container">
+        <div class="center-x">
+            <div class="section-directory">
+            {{ range .Categories }}
+            <div class="flex-container">
+            <h2>{{ .Category }}</h2>
+            {{ range .Sections }}
+            <a href="/section/{{ .Id }}">{{ .Section }}</a>
+            {{ end }}
+            </div>
+            {{ end }}
+            </div>
+        </div>
+        <div class="right">
+        <div class="recent-posts">
+            <h2>Recent Posts</h2>
+            {{ range .Recentposts }}
+            <h3><a href="/section/{{ .Section }}/{{ .Pid }}/{{ .Title }}">{{ .Title }}</a></h3>
+            <h5>By:<a href="/user/{{ .User.Username }}"><span style="color: #{{ .User.User_fg_color }}; text-shadow: 1px 1px 5px #{{ .User.User_bg_color }};" >{{ .User.Username }}</span></a></h5>
+            {{ end }}
+        </div>
+        </div>
     </div>
-    {{ end }}
+-->
+    <div class="index-container">
+        <div class="index-side"></div>
+        <div class="index-center">
+                    <div class="section-directory">
+                    {{ range .Categories }}
+                    <div class="flex-container">
+                    <h2>{{ .Category }}</h2>
+                    {{ range .Sections }}
+                    <a href="/section/{{ .Id }}">{{ .Section }}</a>
+                    {{ end }}
+                    </div>
+                    {{ end }}
+                    </div>
+        </div>
+        <div class="index-side">
+            <div class="recent-posts">
+                <h2>Recent Posts</h2>
+                {{ range .Recentposts }}
+                <h3><a href="/section/{{ .Section }}/{{ .Pid }}/{{ .Title }}">{{ .Title }}</a></h3>
+                <h5>By:<a href="/user/{{ .User.Username }}"><span style="color: #{{ .User.User_fg_color }}; text-shadow: 1px 1px 5px #{{ .User.User_bg_color }};" >{{ .User.Username }}</span></a></h5>
+                {{ end }}
+            </div>
+        </div>
     </div>
-</div>
+      
 </body>
 {{ end }}

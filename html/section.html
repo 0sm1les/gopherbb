@@ -2,10 +2,15 @@
 <body>
 <div class="center-x">
     <div class="flex-container post-container">
-        <h2>{{ .Section }}</h2>
-        {{ if .Logged_in }}
-        <a href="/editor">new post</a>
-        {{ end }}
+        <div class="section-header">
+            <h2>{{ .Section }}</h2>
+            {{ if .Logged_in }}
+            <button>newest</button>
+            <button>most liked</button>
+            <a href="/editor">new post</a>
+            {{ end }}
+            <hr>
+        </div>
         {{ range .Posts }}
         <div class="post-listing">
             <h3><a href="/section/{{ $.Section }}/{{ .Pid }}/{{ .Title }}">{{ .Title }}</a></h3>

@@ -153,6 +153,11 @@ body {
     justify-content: center;
 }
 
+.right {
+    display: flex;
+    justify-content: end;
+}
+
 .center {
     height: 80vh;
     display: flex;
@@ -302,7 +307,7 @@ textarea {
     height: calc(100% - 2em);
     max-height: calc(100% - 2em);
 }
-
+.recent-posts div,
 .section-directory div {
     border: 1px solid var(--primary3);
     margin-top: 1em;
@@ -310,6 +315,7 @@ textarea {
     padding: 0;
 }
 
+.recent-posts h2,
 .section-directory h2 {
     color: var(--primary);
     border-bottom: 1px solid var(--primary3);
@@ -373,11 +379,14 @@ textarea {
     background-color: var(--secondary);
 }
 
+.recent-posts,
 .post-listing {
     border-bottom:1px solid var(--primary3);
     padding: 0.2em 0.5em;
 }
-  
+
+.recent-posts h3,
+.recent-posts h5,
 .post-listing h3,
 .post-listing h5 {
     margin: 0;
@@ -391,6 +400,19 @@ textarea {
 .post-listing h5 {
     color: var(--primary3)
 }
+
+.recent-posts {
+    border: 1px solid var(--primary3);
+}
+.recent-posts h5 {
+    border-bottom: 1px solid var(--primary2);
+}
+
+.recent-post-container {
+    display: flex;
+    justify-content: right;
+}
+
 
 .post {
     border: 1px solid var(--primary3);
@@ -425,9 +447,19 @@ textarea {
     color: var(--primary);
 }
 
-.post hr {
+hr {
+    width: calc(100% - 1em);
     color: var(--primary3);
 }
+
+.section-header hr {
+    width: 100%;
+}
+
+.section-header h2 {
+    margin-bottom: 0.5em;
+}
+
 
 pre {
     color: var(--primary4);
@@ -491,11 +523,12 @@ pre {
 }
 
 footer {
-    font-size: smaller;
+    font-size: small;
     position:fixed;
     bottom:0;
     left:0;
-    height: 2em;
+    padding-left: 1em;
+    padding-bottom: 1em;
 }
 
 .message {
@@ -508,4 +541,22 @@ footer {
 
 .danger {
     color: var(--danger);
+}
+
+.index-container {
+    display: flex;
+    gap: 3em;
+}
+
+
+.index-center {
+    flex: 2;
+
+}
+
+.index-side {
+    flex: 1;
+    margin-top: 1em;
+    margin-left: 3.5em;
+    margin-right: 3.5em;
 }

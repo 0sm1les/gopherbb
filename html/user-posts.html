@@ -1,10 +1,13 @@
 {{ define "html/user-posts.html" }}
 <div class="center-x">
 <div class="flex-container post-container">
+    <div class="section-header">
     <h2>{{ .Status }}</h2>
     {{ if eq .Status "Drafts" }}
     <a href="/editor">new post</a>
     {{ end }}
+    <hr>
+    </div>
     {{ range .Posts }}
     <div class="post-listing">
         {{ if eq .Status "draft" }}

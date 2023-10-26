@@ -340,3 +340,20 @@ func DeleteReply(cid int32) error {
 	_, err := dbpool.Exec(context.Background(), "UPDATE comments SET status = $1 WHERE id = $2", "deleted", cid)
 	return err
 }
+
+func RecentPosts() ([]models.PostListing, error) {
+	var posts []models.PostListing
+	results, err := dbpool.Query(context.Background(), "SELECT id, poster, title, section, time_posted FROM posts ORDER BY id DESC LIMIT 10")
+	if err != nil {
+		return nil, err
+	}
+	for results.Next() {
+		var post models.PostListing
+		err = results.Scan(&post.Pid, &post.Uid, &post.Title, &post.Section, &post.Time_posted)
+		if err != nil {
+			return nil, err
+		}
+		posts = append(posts, post)
+	}
+	return posts, nil
+}

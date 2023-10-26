@@ -236,16 +236,29 @@ func index(c *gin.Context) {
 	initsession(c)
 	session, _ := store.Get(c.Request, "session")
 	uid := session.Values["id"].(int32)
+
+	recentPosts, err := querydb.RecentPosts()
+	if err != nil {
+		logger.Error().Err(err).Msg("")
+		return
+	}
+	for i := 0; i < len(recentPosts); i++ {
+		recentPosts[i].User, err = querydb.GetUser(recentPosts[i].Uid)
+		if err != nil {
+			logger.Error().Err(err).Msg("")
+			return
+		}
+	}
 	if uid != -1 {
 		userinfo, _ := querydb.Userinfo(uid)
 		html := template.Must(template.ParseFiles("html/auth_header.html", "html/index.html", "html/footer.html"))
 		html.ExecuteTemplate(c.Writer, "html/auth_header.html", gin.H{"Title": "Index", "Userinfo": userinfo})
-		html.ExecuteTemplate(c.Writer, "html/index.html", gin.H{"Categories": Categories})
+		html.ExecuteTemplate(c.Writer, "html/index.html", gin.H{"Categories": Categories, "Recentposts": recentPosts})
 		html.ExecuteTemplate(c.Writer, "html/footer.html", nil)
 	} else {
 		html := template.Must(template.ParseFiles("html/unauth_header.html", "html/index.html", "html/footer.html"))
 		html.ExecuteTemplate(c.Writer, "html/unauth_header.html", gin.H{"Title": "Index"})
-		html.ExecuteTemplate(c.Writer, "html/index.html", gin.H{"Categories": Categories})
+		html.ExecuteTemplate(c.Writer, "html/index.html", gin.H{"Categories": Categories, "Recentposts": recentPosts})
 		html.ExecuteTemplate(c.Writer, "html/footer.html", nil)
 	}
 }
