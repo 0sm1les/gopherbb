@@ -25,7 +25,7 @@ CREATE TABLE posts (
     poster int references users(id) NOT NULL,
     section varchar(32) NOT NULL,
     status varchar(8) CHECK (status in ('draft', 'posted', 'deleted')) NOT NULL,
-    title varchar(32) NOT NULL,
+    title varchar(64) NOT NULL,
     md TEXT NOT NULL,
     html TEXT NOT NULL,
     time_posted timestamp without time zone NOT NULL,

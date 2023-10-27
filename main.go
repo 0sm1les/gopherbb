@@ -26,6 +26,8 @@ import (
 
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
+
+	highlighting "github.com/yuin/goldmark-highlighting/v2"
 )
 
 var store = sessions.NewCookieStore([]byte(os.Getenv("dkyc_cookie_key")))
@@ -34,7 +36,8 @@ var Categories []models.Category
 
 var Sections = make(map[string]string)
 
-var md = goldmark.New(goldmark.WithExtensions(extension.GFM))
+var md = goldmark.New(goldmark.WithExtensions(extension.GFM,
+	highlighting.NewHighlighting(highlighting.WithStyle("monokai"))))
 
 var logger zerolog.Logger
 

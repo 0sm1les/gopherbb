@@ -61,4 +61,8 @@ The theme can be easily adjusted by changing the 7 color variables in the css fi
 The default user name colors can be changed by editing the user table in gopherbb.sql, default username colors are black.
 
 ## TODO
+- add security options in config files: account creation cool down, post cool down.
+- add option for mods and admins to pin posts
+- add option for mods and admins to remove posts
+- add option for mods and admins to ban users
 - refine css for chrome
