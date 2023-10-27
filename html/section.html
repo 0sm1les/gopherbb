@@ -4,19 +4,15 @@
     <div class="flex-container post-container">
         <div class="section-header">
             <h2>{{ .Section }}</h2>
+            <button hx-get="/section/{{ .Section }}/newest" hx-swap="innerHTML" hx-target="#post-listing">newest</button>
+            <button hx-get="/section/{{ .Section }}/mostliked" hx-swap="innerHTML" hx-target="#post-listing">most liked</button>
             {{ if .Logged_in }}
-            <button>newest</button>
-            <button>most liked</button>
             <a href="/editor">new post</a>
             {{ end }}
             <hr>
         </div>
-        {{ range .Posts }}
-        <div class="post-listing">
-            <h3><a href="/section/{{ $.Section }}/{{ .Pid }}/{{ .Title }}">{{ .Title }}</a></h3>
-            <h5>By:<a href="/user/{{ .User.Username }}"><span style="color: #{{ .User.User_fg_color }}; text-shadow: 1px 1px 5px #{{ .User.User_bg_color }};" >{{ .User.Username }}</span></a> On: {{ .Time_formatted }}</h5>
+        <div id="post-listing" hx-get="/section/{{ .Section }}/newest" hx-trigger="load">
         </div>
-        {{ end }}
     </div>
 </div>
 </body>

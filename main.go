@@ -156,6 +156,8 @@ func main() {
 	router.GET("/delete/reply/:cid", deleteReply)
 
 	router.GET("/section/:section", section)
+	router.GET("/section/:section/mostliked", mostLiked)
+	router.GET("/section/:section/newest", newest)
 	router.GET("/section/:section/:id/:title", viewPost)
 
 	router.GET("/reply/:pid/comment/:cid", reply)
@@ -341,7 +343,7 @@ func register(c *gin.Context) {
 				if querydb.UserExists(verified_user) == -1 {
 					err = querydb.CreateUser(verified_user, auth.Hashpassword(verified_pass))
 					if err != nil {
-						logger.Error().Err(err)
+						logger.Error().Err(err).Msg("")
 						return
 					}
 					html := template.Must(template.ParseFiles("html/unauth_header.html", "html/login.html", "html/footer.html"))
@@ -379,31 +381,31 @@ func profile(c *gin.Context) {
 	if uid != -1 {
 		user, err := auth.ValidateUser(c.Param("user"))
 		if err != nil {
-			logger.Error().Err(err)
+			logger.Error().Err(err).Msg("")
 			return
 		}
 
 		userinfo, err := querydb.Userinfo(uid)
 		if err != nil {
-			logger.Error().Err(err)
+			logger.Error().Err(err).Msg("")
 		}
 
 		if other_uid := querydb.UserExists(user); other_uid != -1 {
 			other_userinfo, err := querydb.Userinfo(other_uid)
 			if err != nil {
-				logger.Error().Err(err)
+				logger.Error().Err(err).Msg("")
 			}
 
 			other_userinfo.Date_formatted = other_userinfo.Date_Joined.Format("2006-02-02")
 
 			userlisted, err := querydb.GetUser(other_uid)
 			if err != nil {
-				logger.Error().Err(err)
+				logger.Error().Err(err).Msg("")
 			}
 
 			posts, err := querydb.RecentUserPosts(other_uid)
 			if err != nil {
-				logger.Error().Err(err)
+				logger.Error().Err(err).Msg("")
 			}
 			for i := 0; i < len(posts); i++ {
 				posts[i].User = userlisted
@@ -429,7 +431,7 @@ func settings(c *gin.Context) {
 		if c.Request.Method == "GET" {
 			userinfo, err := querydb.Userinfo(uid)
 			if err != nil {
-				logger.Error().Err(err)
+				logger.Error().Err(err).Msg("")
 			}
 
 			html := template.Must(template.ParseFiles("html/auth_header.html", "html/settings.html", "html/footer.html"))
@@ -440,7 +442,7 @@ func settings(c *gin.Context) {
 			if c.Param("setting") == "pfp" {
 				pfp, err := c.FormFile("pfp")
 				if err != nil {
-					logger.Error().Err(err)
+					logger.Error().Err(err).Msg("")
 					return
 				}
 				if pfp.Size > 500000 {
@@ -484,28 +486,28 @@ func settings(c *gin.Context) {
 				fg = strings.Replace(fg, "#", "", 1)
 				bg = strings.Replace(bg, "#", "", 1)
 				if _, err := hex.DecodeString(fg); err != nil || len(fg) != 6 {
-					logger.Error().Err(err)
+					logger.Error().Err(err).Msg("")
 					html := template.Must(template.ParseFiles("html/htmx/form_feedback.html"))
 					html.ExecuteTemplate(c.Writer, "html/htmx/form_feedback.html", gin.H{"Result": "error", "Message": "invalid color format"})
 					return
 				}
 
 				if _, err := hex.DecodeString(bg); err != nil || len(bg) != 6 {
-					logger.Error().Err(err)
+					logger.Error().Err(err).Msg("")
 					html := template.Must(template.ParseFiles("html/htmx/form_feedback.html"))
 					html.ExecuteTemplate(c.Writer, "html/htmx/form_feedback.html", gin.H{"Result": "error", "Message": "invalid color format"})
 					return
 				}
 
 				if err := querydb.SetColor(uid, "fg", fg); err != nil {
-					logger.Error().Err(err)
+					logger.Error().Err(err).Msg("")
 					html := template.Must(template.ParseFiles("html/htmx/form_feedback.html"))
 					html.ExecuteTemplate(c.Writer, "html/htmx/form_feedback.html", gin.H{"Result": "error", "Message": "error setting colors"})
 					return
 				}
 
 				if err := querydb.SetColor(uid, "bg", bg); err != nil {
-					logger.Error().Err(err)
+					logger.Error().Err(err).Msg("")
 					html := template.Must(template.ParseFiles("html/htmx/form_feedback.html"))
 					html.ExecuteTemplate(c.Writer, "html/htmx/form_feedback.html", gin.H{"Result": "error", "Message": "error setting colors"})
 					return
@@ -519,7 +521,7 @@ func settings(c *gin.Context) {
 				bio := c.PostForm("profile-bio")
 				err := querydb.SetBio(uid, bio)
 				if err != nil {
-					logger.Error().Err(err)
+					logger.Error().Err(err).Msg("")
 					html := template.Must(template.ParseFiles("html/htmx/form_feedback.html"))
 					html.ExecuteTemplate(c.Writer, "html/htmx/form_feedback.html", gin.H{"Result": "error", "Message": "error updating bio"})
 					return
@@ -540,7 +542,7 @@ func editor(c *gin.Context) {
 
 		userinfo, err := querydb.Userinfo(uid)
 		if err != nil {
-			logger.Error().Err(err)
+			logger.Error().Err(err).Msg("")
 			return
 		}
 
@@ -554,13 +556,13 @@ func editor(c *gin.Context) {
 
 			pid, err := strconv.ParseInt(c.Param("id"), 10, 32)
 			if err != nil {
-				logger.Error().Err(err)
+				logger.Error().Err(err).Msg("")
 				return
 			}
 
 			postinfo, err := querydb.GetPost(int32(pid))
 			if err != nil {
-				logger.Error().Err(err)
+				logger.Error().Err(err).Msg("")
 				return
 			}
 
@@ -588,12 +590,12 @@ func render(c *gin.Context) {
 		var raw_md models.Post
 		var buf bytes.Buffer
 		if err := c.ShouldBindJSON(&raw_md); err != nil {
-			logger.Error().Err(err)
+			logger.Error().Err(err).Msg("")
 			return
 		}
 
 		if err := md.Convert([]byte(raw_md.Md), &buf); err != nil {
-			logger.Error().Err(err)
+			logger.Error().Err(err).Msg("")
 			return
 		}
 		c.String(200, buf.String())
@@ -612,19 +614,19 @@ func save(c *gin.Context) {
 		var buf bytes.Buffer
 
 		if err := c.ShouldBindJSON(&post); err != nil {
-			logger.Error().Err(err)
+			logger.Error().Err(err).Msg("")
 			return
 		}
 
 		section, err := validateSection(post.Section)
 		if err != nil {
-			logger.Error().Err(err)
+			logger.Error().Err(err).Msg("")
 			return
 		}
 
 		//compile html
 		if err := md.Convert([]byte(post.Md), &buf); err != nil {
-			logger.Error().Err(err)
+			logger.Error().Err(err).Msg("")
 			return
 		}
 
@@ -632,7 +634,7 @@ func save(c *gin.Context) {
 		if c.Param("id") == "" {
 			pid, err := querydb.NewPost(uid, section.Id, "draft", post.Title, post.Md, buf.String())
 			if err != nil {
-				logger.Error().Err(err)
+				logger.Error().Err(err).Msg("")
 				return
 			}
 			c.JSON(200, gin.H{"pid": pid, "html": buf.String()})
@@ -642,12 +644,12 @@ func save(c *gin.Context) {
 
 			pid, err := strconv.ParseInt(c.Param("id"), 10, 32)
 			if err != nil {
-				logger.Error().Err(err)
+				logger.Error().Err(err).Msg("")
 				return
 			}
 			poster, _, _, err := querydb.GetPostOP(int32(pid))
 			if err != nil {
-				logger.Error().Err(err)
+				logger.Error().Err(err).Msg("")
 				return
 			}
 
@@ -658,7 +660,7 @@ func save(c *gin.Context) {
 
 			err = querydb.UpdatePost(int32(pid), post.Title, post.Md, buf.String(), section.Id)
 			if err != nil {
-				logger.Error().Err(err)
+				logger.Error().Err(err).Msg("")
 				return
 			}
 			c.JSON(200, gin.H{"html": buf.String()})
@@ -676,37 +678,37 @@ func post(c *gin.Context) {
 		var err error
 
 		if err := c.ShouldBindJSON(&post); err != nil {
-			logger.Error().Err(err)
+			logger.Error().Err(err).Msg("")
 			return
 		}
 
 		section, err := validateSection(post.Section)
 		if err != nil {
-			logger.Error().Err(err)
+			logger.Error().Err(err).Msg("")
 			return
 		}
 
 		if err := md.Convert([]byte(post.Md), &buf); err != nil {
-			logger.Error().Err(err)
+			logger.Error().Err(err).Msg("")
 			return
 		}
 
 		if c.Param("id") == "" {
 			pid, err := querydb.NewPost(uid, section.Id, "posted", post.Title, post.Md, buf.String())
 			if err != nil {
-				logger.Error().Err(err)
+				logger.Error().Err(err).Msg("")
 				return
 			}
 			c.JSON(200, gin.H{"pid": pid, "section": section.Id, "title": post.Title})
 		} else {
 			pid, err := strconv.ParseInt(c.Param("id"), 10, 32)
 			if err != nil {
-				logger.Error().Err(err)
+				logger.Error().Err(err).Msg("")
 				return
 			}
 			poster, _, _, err := querydb.GetPostOP(int32(pid))
 			if err != nil {
-				logger.Error().Err(err)
+				logger.Error().Err(err).Msg("")
 				return
 			}
 
@@ -717,12 +719,12 @@ func post(c *gin.Context) {
 
 			err = querydb.UpdatePost(int32(pid), post.Title, post.Md, buf.String(), section.Id)
 			if err != nil {
-				logger.Error().Err(err)
+				logger.Error().Err(err).Msg("")
 				return
 			}
 			err = querydb.UpdatePostStatus(int32(pid), "posted")
 			if err != nil {
-				logger.Error().Err(err)
+				logger.Error().Err(err).Msg("")
 				return
 			}
 			c.JSON(200, gin.H{"pid": pid, "section": section.Id, "title": post.Title})
@@ -737,7 +739,7 @@ func posts(c *gin.Context) {
 	if uid != -1 {
 		userinfo, err := querydb.Userinfo(uid)
 		if err != nil {
-			logger.Error().Err(err)
+			logger.Error().Err(err).Msg("")
 			return
 		}
 		user := c.Param("user")
@@ -745,13 +747,13 @@ func posts(c *gin.Context) {
 
 		userListed, err := querydb.GetUser(user_id)
 		if err != nil {
-			logger.Error().Err(err)
+			logger.Error().Err(err).Msg("")
 			return
 		}
 
 		posts, err := querydb.UserPosts(user_id, "posted")
 		if err != nil {
-			logger.Error().Err(err)
+			logger.Error().Err(err).Msg("")
 			return
 		}
 
@@ -775,19 +777,19 @@ func drafts(c *gin.Context) {
 	if uid != -1 {
 		userinfo, err := querydb.Userinfo(uid)
 		if err != nil {
-			logger.Error().Err(err)
+			logger.Error().Err(err).Msg("")
 			return
 		}
 
 		userListed, err := querydb.GetUser(uid)
 		if err != nil {
-			logger.Error().Err(err)
+			logger.Error().Err(err).Msg("")
 			return
 		}
 
 		posts, err := querydb.UserPosts(uid, "draft")
 		if err != nil {
-			logger.Error().Err(err)
+			logger.Error().Err(err).Msg("")
 			return
 		}
 
@@ -811,41 +813,24 @@ func section(c *gin.Context) {
 
 	section, err := validateSection(c.Param("section"))
 	if err != nil {
-		logger.Error().Err(err)
+		logger.Error().Err(err).Msg("")
 		return
 	}
-
-	posts, err := querydb.GetSectionPosts(section.Id)
-	if err != nil {
-		logger.Error().Err(err)
-		return
-	}
-
-	for i := 0; i < len(posts); i++ {
-		posts[i].User, err = querydb.GetUser(posts[i].Uid)
-		if err != nil {
-			logger.Error().Err(err)
-			return
-		}
-
-		posts[i].Time_formatted = posts[i].Time_posted.Format("2006-02-02")
-	}
-
 	if uid != -1 {
 		userinfo, err := querydb.Userinfo(uid)
 		if err != nil {
-			logger.Error().Err(err)
+			logger.Error().Err(err).Msg("")
 			return
 		}
 
 		html := template.Must(template.ParseFiles("html/auth_header.html", "html/section.html", "html/footer.html"))
 		html.ExecuteTemplate(c.Writer, "html/auth_header.html", gin.H{"Title": section.Section, "Userinfo": userinfo})
-		html.ExecuteTemplate(c.Writer, "html/section.html", gin.H{"Posts": posts, "Section": section.Id, "Logged_in": true})
+		html.ExecuteTemplate(c.Writer, "html/section.html", gin.H{"Section": section.Id, "Logged_in": true})
 		html.ExecuteTemplate(c.Writer, "html/footer.html", nil)
 	} else {
 		html := template.Must(template.ParseFiles("html/unauth_header.html", "html/section.html", "html/footer.html"))
 		html.ExecuteTemplate(c.Writer, "html/unauth_header.html", gin.H{"Title": section.Section})
-		html.ExecuteTemplate(c.Writer, "html/section.html", gin.H{"Posts": posts, "Section": section.Id, "Logged_in": false})
+		html.ExecuteTemplate(c.Writer, "html/section.html", gin.H{"Section": section.Id, "Logged_in": false})
 		html.ExecuteTemplate(c.Writer, "html/footer.html", nil)
 	}
 }
@@ -857,13 +842,13 @@ func viewPost(c *gin.Context) {
 
 	pid, err := strconv.ParseInt(c.Param("id"), 10, 32)
 	if err != nil {
-		logger.Error().Err(err)
+		logger.Error().Err(err).Msg("")
 		return
 	}
 
 	postinfo, err := querydb.GetPost(int32(pid))
 	if err != nil {
-		logger.Error().Err(err)
+		logger.Error().Err(err).Msg("")
 		return
 	}
 
@@ -871,19 +856,19 @@ func viewPost(c *gin.Context) {
 
 	userlisted, err := querydb.GetUser(postinfo.Uid)
 	if err != nil {
-		logger.Error().Err(err)
+		logger.Error().Err(err).Msg("")
 		return
 	}
 
 	comments, err := querydb.GetComments(postinfo.Pid)
 	if err != nil {
-		logger.Error().Err(err)
+		logger.Error().Err(err).Msg("")
 		return
 	}
 	for i := 0; i < len(comments); i++ {
 		comments[i].User, err = querydb.GetUser(comments[i].User_id)
 		if err != nil {
-			logger.Error().Err(err)
+			logger.Error().Err(err).Msg("")
 			return
 		}
 	}
@@ -892,7 +877,7 @@ func viewPost(c *gin.Context) {
 
 		userinfo, err := querydb.Userinfo(uid)
 		if err != nil {
-			logger.Error().Err(err)
+			logger.Error().Err(err).Msg("")
 			return
 		}
 
@@ -929,7 +914,7 @@ func reply(c *gin.Context) {
 		pid, err := strconv.ParseInt(c.Param("pid"), 10, 32)
 
 		if err != nil {
-			logger.Error().Err(err)
+			logger.Error().Err(err).Msg("")
 			return
 		}
 
@@ -937,7 +922,7 @@ func reply(c *gin.Context) {
 			cid, err = strconv.ParseInt(c.Param("cid"), 10, 32)
 
 			if err != nil {
-				logger.Error().Err(err)
+				logger.Error().Err(err).Msg("")
 				return
 			}
 		}
@@ -958,51 +943,51 @@ func reply(c *gin.Context) {
 
 			OP, section, title, err := querydb.GetPostOP(int32(pid))
 			if err != nil {
-				logger.Error().Err(err)
+				logger.Error().Err(err).Msg("")
 				return
 			}
 			if cid == 0 {
 
 				if err := md.Convert([]byte(comment), &buf); err != nil {
-					logger.Error().Err(err)
+					logger.Error().Err(err).Msg("")
 					return
 				}
 
 				_, err = querydb.PostComment(uid, int32(pid), -1, comment, buf.String())
 				if err != nil {
-					logger.Error().Err(err)
+					logger.Error().Err(err).Msg("")
 					return
 				}
 				if OP != uid {
 					err = querydb.NewNotification(OP, uid, fmt.Sprintf(`Left a comment on your post <a href="/section/%s/%d/%s">%s</a>`, section, pid, title, title))
 					if err != nil {
-						logger.Error().Err(err)
+						logger.Error().Err(err).Msg("")
 						return
 					}
 				}
 
 			} else if cid != 0 {
 				if err := md.Convert([]byte(comment), &buf); err != nil {
-					logger.Error().Err(err)
+					logger.Error().Err(err).Msg("")
 					return
 				}
 
 				_, err = querydb.PostComment(uid, int32(pid), int32(cid), comment, buf.String())
 				if err != nil {
-					logger.Error().Err(err)
+					logger.Error().Err(err).Msg("")
 					return
 				}
 
 				comment_poster, err := querydb.GetCommentPoster(int32(cid))
 				if err != nil {
-					logger.Error().Err(err)
+					logger.Error().Err(err).Msg("")
 					return
 				}
 
 				if comment_poster != uid {
 					err = querydb.NewNotification(comment_poster, uid, fmt.Sprintf(`Responsed to your comment on <a href="/section/%s/%d/%s">%s</a>`, section, pid, title, title))
 					if err != nil {
-						logger.Error().Err(err)
+						logger.Error().Err(err).Msg("")
 						return
 					}
 				}
@@ -1020,12 +1005,12 @@ func like(c *gin.Context) {
 	if uid != -1 {
 		pid, err := strconv.ParseInt(c.Param("pid"), 10, 32)
 		if err != nil {
-			logger.Error().Err(err)
+			logger.Error().Err(err).Msg("")
 			return
 		}
 		err = querydb.LikeUnlike(uid, int32(pid))
 		if err != nil {
-			logger.Error().Err(err)
+			logger.Error().Err(err).Msg("")
 			return
 		}
 	}
@@ -1038,20 +1023,20 @@ func likes(c *gin.Context) {
 	if uid != -1 {
 		userinfo, err := querydb.Userinfo(uid)
 		if err != nil {
-			logger.Error().Err(err)
+			logger.Error().Err(err).Msg("")
 			return
 		}
 
 		posts, err := querydb.Likes(uid)
 		if err != nil {
-			logger.Error().Err(err)
+			logger.Error().Err(err).Msg("")
 			return
 		}
 
 		for i := 0; i < len(posts); i++ {
 			posts[i].User, err = querydb.GetUser(posts[i].Uid)
 			if err != nil {
-				logger.Error().Err(err)
+				logger.Error().Err(err).Msg("")
 				return
 			}
 			posts[i].Time_formatted = posts[i].Time_posted.Format("2006-02-02")
@@ -1071,20 +1056,20 @@ func notifications(c *gin.Context) {
 	if uid != -1 {
 		userinfo, err := querydb.Userinfo(uid)
 		if err != nil {
-			logger.Error().Err(err)
+			logger.Error().Err(err).Msg("")
 			return
 		}
 
 		notifications, err := querydb.Notifications(uid)
 		if err != nil {
-			logger.Error().Err(err)
+			logger.Error().Err(err).Msg("")
 			return
 		}
 
 		for i := 0; i < len(notifications); i++ {
 			notifications[i].From_Uid_Listing, _ = querydb.GetUser(notifications[i].From_Uid)
 			if err != nil {
-				logger.Error().Err(err)
+				logger.Error().Err(err).Msg("")
 				return
 			}
 		}
@@ -1106,7 +1091,7 @@ func search(c *gin.Context) {
 		if uid != -1 {
 			userinfo, err := querydb.Userinfo(uid)
 			if err != nil {
-				logger.Error().Err(err)
+				logger.Error().Err(err).Msg("")
 				return
 			}
 			html := template.Must(template.ParseFiles("html/auth_header.html", "html/search.html", "html/footer.html"))
@@ -1124,14 +1109,14 @@ func search(c *gin.Context) {
 	} else if qry != "" {
 		posts, err := querydb.Search(qry)
 		if err != nil {
-			logger.Error().Err(err)
+			logger.Error().Err(err).Msg("")
 			return
 		}
 
 		for i := 0; i < len(posts); i++ {
 			posts[i].User, err = querydb.GetUser(posts[i].Uid)
 			if err != nil {
-				logger.Error().Err(err)
+				logger.Error().Err(err).Msg("")
 				return
 			}
 
@@ -1150,26 +1135,26 @@ func deletePost(c *gin.Context) {
 	if uid != -1 {
 		pid, err := strconv.ParseInt(c.Param("pid"), 10, 32)
 		if err != nil {
-			logger.Error().Err(err)
+			logger.Error().Err(err).Msg("")
 			return
 		}
 
 		userlisted, err := querydb.GetUser(uid)
 		if err != nil {
-			logger.Error().Err(err)
+			logger.Error().Err(err).Msg("")
 			return
 		}
 
 		postop, _, _, err := querydb.GetPostOP(int32(pid))
 		if err != nil {
-			logger.Error().Err(err)
+			logger.Error().Err(err).Msg("")
 			return
 		}
 
 		if postop == uid {
 			err = querydb.DeletePost(int32(pid))
 			if err != nil {
-				logger.Error().Err(err)
+				logger.Error().Err(err).Msg("")
 				return
 			}
 			c.Header("HX-Redirect", fmt.Sprintf("/user/%s/posts", userlisted.Username))
@@ -1184,21 +1169,73 @@ func deleteReply(c *gin.Context) {
 	if uid != -1 {
 		cid, err := strconv.ParseInt(c.Param("cid"), 10, 32)
 		if err != nil {
-			logger.Error().Err(err)
+			logger.Error().Err(err).Msg("")
 			return
 		}
 
 		commentPost, err := querydb.GetCommentPoster(int32(cid))
 		if err != nil {
-			logger.Error().Err(err)
+			logger.Error().Err(err).Msg("")
 			return
 		}
 		if commentPost == uid {
 			err = querydb.DeleteReply(int32(cid))
 			if err != nil {
-				logger.Error().Err(err)
+				logger.Error().Err(err).Msg("")
 				return
 			}
 		}
 	}
+}
+
+func mostLiked(c *gin.Context) {
+	section, err := validateSection(c.Param("section"))
+	if err != nil {
+		logger.Error().Err(err).Msg("")
+		return
+	}
+
+	posts, err := querydb.MostLiked(section)
+	if err != nil {
+		logger.Error().Err(err).Msg("")
+		return
+	}
+
+	for i := 0; i < len(posts); i++ {
+		posts[i].User, err = querydb.GetUser(posts[i].Uid)
+		if err != nil {
+			logger.Error().Err(err).Msg("")
+			return
+		}
+		posts[i].Time_formatted = posts[i].Time_posted.Format("2006-02-02")
+	}
+
+	html := template.Must(template.ParseFiles("html/htmx/results.html"))
+	html.ExecuteTemplate(c.Writer, "html/htmx/results.html", gin.H{"Posts": posts, "Section": section.Id})
+}
+
+func newest(c *gin.Context) {
+	section, err := validateSection(c.Param("section"))
+	if err != nil {
+		logger.Error().Err(err).Msg("")
+		return
+	}
+
+	posts, err := querydb.GetSectionPosts(section.Id)
+	if err != nil {
+		logger.Error().Err(err).Msg("")
+		return
+	}
+
+	for i := 0; i < len(posts); i++ {
+		posts[i].User, err = querydb.GetUser(posts[i].Uid)
+		if err != nil {
+			logger.Error().Err(err).Msg("")
+			return
+		}
+		posts[i].Time_formatted = posts[i].Time_posted.Format("2006-02-02")
+	}
+
+	html := template.Must(template.ParseFiles("html/htmx/results.html"))
+	html.ExecuteTemplate(c.Writer, "html/htmx/results.html", gin.H{"Posts": posts, "Section": section.Id})
 }

@@ -357,3 +357,31 @@ func RecentPosts() ([]models.PostListing, error) {
 	}
 	return posts, nil
 }
+
+func MostLiked(section models.Section) ([]models.PostListing, error) {
+	var posts []models.PostListing
+	stmt := `SELECT posts.id, COALESCE(like_data.like_count, 0) as like_count, posts.title, posts.poster, posts.section, posts.time_posted 
+FROM posts
+LEFT JOIN (
+    SELECT post, COUNT(*) AS like_count
+    FROM likes
+    GROUP BY post
+) AS like_data
+ON like_data.post = posts.id WHERE section = $1 ORDER BY like_count DESC;`
+
+	results, err := dbpool.Query(context.Background(), stmt, section.Id)
+	if err != nil {
+		return nil, err
+	}
+	for results.Next() {
+		var post models.PostListing
+		var like_count int
+		err = results.Scan(&post.Pid, &like_count, &post.Title, &post.Uid, &post.Section, &post.Time_posted)
+		if err != nil {
+			return nil, err
+		}
+		//fmt.Println(like_count, post)
+		posts = append(posts, post)
+	}
+	return posts, nil
+}
