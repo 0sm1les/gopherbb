@@ -888,7 +888,7 @@ func viewPost(c *gin.Context) {
 		html := template.Must(template.ParseFiles("html/auth_header.html", "html/post.html", "html/footer.html"))
 		html.ExecuteTemplate(c.Writer, "html/auth_header.html", gin.H{"Title": postinfo.Title, "Userinfo": userinfo})
 		html.ExecuteTemplate(c.Writer, "html/post.html", gin.H{"Postinfo": postinfo,
-			"User":      userinfo,
+			"User":      userlisted,
 			"Comments":  comments,
 			"Liked":     liked,
 			"Logged_in": true,
