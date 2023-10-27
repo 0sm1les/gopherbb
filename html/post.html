@@ -4,12 +4,12 @@
         <div class="thread-container">
             <div class="post-container">
             <h1>{{ .Postinfo.Title }}</h1>
-            <h5>By:<a href="/user/{{ .User.Username }}"><span style="color: #{{ .User.User_fg_color }}; text-shadow: 1px 1px 5px #{{ .User.User_bg_color }};" >{{ .User.Username }}</span></a> On:{{ .Postinfo.Time_formatted }}</h5>
+            <h5>By:<a href="/user/{{ .Postinfo.User.Username }}"><span style="color: #{{ .Postinfo.User.User_fg_color }}; text-shadow: 1px 1px 5px #{{ .Postinfo.User.User_bg_color }};" >{{ .Postinfo.User.Username }}</span></a> On:{{ .Postinfo.Time_formatted }}</h5>
             <div class="post">
             {{ .Postinfo.Html }}
             </div>
             <div></div>
-            {{ if .Logged_in}}
+            {{ if .Logged_in }}
             <div>
                 {{ if .Liked }}
                 <button id="like-button" hx-get="/like/{{ .Postinfo.Pid }}" hx-swap="none">unlike</button>

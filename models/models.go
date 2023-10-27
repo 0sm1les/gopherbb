@@ -30,8 +30,9 @@ type Userlisted struct {
 }
 
 type Post struct {
-	Pid            int32         `json:"pid"`
-	Uid            int32         `json:"uid"`
+	Pid            int32 `json:"pid"`
+	Uid            int32 `json:"uid"`
+	User           Userlisted
 	Status         string        `json:"status"`
 	Title          string        `json:"title"`
 	Section        string        `json:"section"`

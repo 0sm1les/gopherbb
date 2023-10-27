@@ -857,7 +857,7 @@ func viewPost(c *gin.Context) {
 
 	postinfo.Time_formatted = postinfo.Time_posted.Format("2006-02-02")
 
-	userlisted, err := querydb.GetUser(postinfo.Uid)
+	postinfo.User, err = querydb.GetUser(postinfo.Uid)
 	if err != nil {
 		logger.Error().Err(err).Msg("")
 		return
@@ -888,7 +888,6 @@ func viewPost(c *gin.Context) {
 		html := template.Must(template.ParseFiles("html/auth_header.html", "html/post.html", "html/footer.html"))
 		html.ExecuteTemplate(c.Writer, "html/auth_header.html", gin.H{"Title": postinfo.Title, "Userinfo": userinfo})
 		html.ExecuteTemplate(c.Writer, "html/post.html", gin.H{"Postinfo": postinfo,
-			"User":      userlisted,
 			"Comments":  comments,
 			"Liked":     liked,
 			"Logged_in": true,
@@ -899,7 +898,6 @@ func viewPost(c *gin.Context) {
 		html := template.Must(template.ParseFiles("html/unauth_header.html", "html/post.html", "html/footer.html"))
 		html.ExecuteTemplate(c.Writer, "html/unauth_header.html", gin.H{"Title": postinfo.Title})
 		html.ExecuteTemplate(c.Writer, "html/post.html", gin.H{"Postinfo": postinfo,
-			"User":      userlisted,
 			"Comments":  comments,
 			"Liked":     false,
 			"Logged_in": false,
