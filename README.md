@@ -65,4 +65,8 @@ The default user name colors can be changed by editing the user table in gopherb
 - add option for mods and admins to pin posts
 - add option for mods and admins to remove posts
 - add option for mods and admins to ban users
+- add option in config that limits where user roles can post
+- add option in config that specifies forum visibility
+- add option in config to make a forum invite only
+- implement invites
 - refine css for chrome

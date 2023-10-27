@@ -30,7 +30,7 @@ import (
 	highlighting "github.com/yuin/goldmark-highlighting/v2"
 )
 
-var store = sessions.NewCookieStore([]byte(os.Getenv("dkyc_cookie_key")))
+var store = sessions.NewCookieStore([]byte(os.Getenv("gopherbb_cookie_key")))
 
 var Categories []models.Category
 
