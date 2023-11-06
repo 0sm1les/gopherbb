@@ -14,7 +14,9 @@
     <div class="error">{{ . }}</div>
     {{end}}
     </fieldset>
+    {{ if ne .Registration "closed" }}
     <a href="/register">register</a>
+    {{ end }}
 </form>
 </div>
 </div>

@@ -81,3 +81,8 @@ type Category struct {
 	Category string
 	Sections []Section
 }
+
+type Config struct {
+	Registration string
+	Categories   []Category
+}

@@ -423,7 +423,8 @@ textarea {
     overflow-wrap: break-word;
 }
 
-.post * {
+.post > *
+ {
     margin-left: 10px;
     margin-right: 10px;
 }

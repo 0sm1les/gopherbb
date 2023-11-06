@@ -12,7 +12,9 @@
             <li><a href="/">home</a></li>
             <li><a href="/search">search</a></li>
             <li><a href="/login">login</a></li>
+            {{ if ne .Registration "closed" }}
             <li><a href="/register">register</a></li>
+            {{ end }}
         </nav>
         </div>
     </header>

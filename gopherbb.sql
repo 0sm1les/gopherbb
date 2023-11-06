@@ -3,7 +3,7 @@ CREATE DATABASE gopher_bb;
 CREATE TABLE users (
     id SERIAL PRIMARY KEY NOT NULL,
     role varchar(12) CHECK (role in ('unranked', 'ranked', 'mod', 'admin')) DEFAULT 'unranked' NOT NULL,
-    profile_pic varchar(255) DEFAULT '' NOT NULL,
+    profile_pic varchar(255) DEFAULT 'default.png' NOT NULL,
     username varchar(16) NOT NULL,
     password varchar(65) NOT NULL,
     bio varchar(255) DEFAULT '' NOT NULL,

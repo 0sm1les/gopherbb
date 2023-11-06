@@ -16,7 +16,9 @@ gopherbb_console_log
 
 ## config example
 ```
-[
+{
+  "Registration": "closed",
+  "Categories": [
  {
   "Category": "general",
   "Sections": [
@@ -52,6 +54,7 @@ gopherbb_console_log
   ]
  }
 ]
+}
 ```
 
 ## changing theme
@@ -61,12 +64,5 @@ The theme can be easily adjusted by changing the 7 color variables in the css fi
 The default user name colors can be changed by editing the user table in gopherbb.sql, default username colors are black.
 
 ## TODO
-- add security options in config files: account creation cool down, post cool down.
-- add option for mods and admins to pin posts
-- add option for mods and admins to remove posts
-- add option for mods and admins to ban users
-- add option in config that limits where user roles can post
-- add option in config that specifies forum visibility
-- add option in config to make a forum invite only
-- implement invites
+- break up main
 - refine css for chrome
