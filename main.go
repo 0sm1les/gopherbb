@@ -862,6 +862,9 @@ func viewPost(c *gin.Context) {
 		logger.Error().Err(err).Msg("")
 		return
 	}
+	if postinfo.Status != "posted" {
+		index(c)
+	}
 
 	postinfo.Time_formatted = formattedTime(postinfo.Time_posted)
 

@@ -343,7 +343,7 @@ func DeleteReply(cid int32) error {
 
 func RecentPosts() ([]models.PostListing, error) {
 	var posts []models.PostListing
-	results, err := dbpool.Query(context.Background(), "SELECT id, poster, title, section, time_posted FROM posts ORDER BY id DESC LIMIT 10")
+	results, err := dbpool.Query(context.Background(), "SELECT id, poster, title, section, time_posted FROM posts WHERE status = $1 ORDER BY id DESC LIMIT 10", "posted")
 	if err != nil {
 		return nil, err
 	}
