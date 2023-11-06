@@ -201,7 +201,7 @@ func readConf(conf_file string) {
 
 func validateSection(sectionId string) (models.Section, error) {
 	if val, ok := Sections[sectionId]; ok {
-		return models.Section{sectionId, val}, nil
+		return models.Section{Section: val, Id: sectionId}, nil
 	}
 	return models.Section{}, errors.New("section does not exist")
 }
@@ -704,7 +704,6 @@ func post(c *gin.Context) {
 			logger.Error().Err(err).Msg("")
 			return
 		}
-
 		if c.Param("id") == "" {
 			pid, err := querydb.NewPost(uid, section.Id, "posted", post.Title, post.Md, buf.String())
 			if err != nil {
