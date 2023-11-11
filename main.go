@@ -126,10 +126,12 @@ func main() {
 	})
 
 	router.Static("/pictures", "html/user_pictures")
-	router.LoadHTMLGlob("html/*.html")
-	router.StaticFile("/custom.css", "./html/static/custom.css")
+	router.LoadHTMLGlob("./html/*.html")
+	//router.StaticFile("/gopherbb.css", "./html/static/gopherbb.css")
 	router.StaticFile("/DroidSansMono.ttf", "./html/static/DroidSansMono.ttf")
+	router.LoadHTMLFiles("./html/static/gopherbb.css")
 
+	router.GET("/gopherbb.css", css)
 	router.GET("/", index)
 	router.GET("/login", login)
 	router.POST("/login", login)
@@ -242,6 +244,37 @@ func deauthsession(user_id int32, c *gin.Context) error {
 		return err
 	}
 	return nil
+}
+
+func css(c *gin.Context) {
+	/*
+		primary1 := template.CSS("red")
+		primary2 := template.CSS("red")
+
+		background1 := template.CSS("black")
+		background2 := template.CSS("black")
+	*/
+	c.Header("Content-Type", "text/css; charset=utf-8")
+	css := template.Must(template.ParseFiles("html/static/gopherbb.css"))
+	/*
+		err := css.ExecuteTemplate(c.Writer, "html/static/gopherbb.css", gin.H{"Primary1": primary1, "Primary2": primary2, "Background1": background1, "Background2": background2})
+		if err != nil {
+			fmt.Println(err)
+		}
+	*/
+	initsession(c)
+	session, _ := store.Get(c.Request, "session")
+	uid := session.Values["id"].(int32)
+	if uid != -1 {
+		theme, err := querydb.GetTheme(uid)
+		if err != nil {
+			logger.Error().Err(err).Msg("")
+		}
+		css.ExecuteTemplate(c.Writer, "html/static/gopherbb.css", gin.H{"Theme": theme})
+		return
+	} else {
+
+	}
 }
 
 func index(c *gin.Context) {
@@ -511,14 +544,7 @@ func settings(c *gin.Context) {
 					return
 				}
 
-				if err := querydb.SetColor(uid, "fg", fg); err != nil {
-					logger.Error().Err(err).Msg("")
-					html := template.Must(template.ParseFiles("html/htmx/form_feedback.html"))
-					html.ExecuteTemplate(c.Writer, "html/htmx/form_feedback.html", gin.H{"Result": "error", "Message": "error setting colors"})
-					return
-				}
-
-				if err := querydb.SetColor(uid, "bg", bg); err != nil {
+				if err := querydb.SetColor(uid, fg, bg); err != nil {
 					logger.Error().Err(err).Msg("")
 					html := template.Must(template.ParseFiles("html/htmx/form_feedback.html"))
 					html.ExecuteTemplate(c.Writer, "html/htmx/form_feedback.html", gin.H{"Result": "error", "Message": "error setting colors"})
@@ -540,6 +566,55 @@ func settings(c *gin.Context) {
 				}
 				html := template.Must(template.ParseFiles("html/htmx/form_feedback.html"))
 				html.ExecuteTemplate(c.Writer, "html/htmx/form_feedback.html", gin.H{"Result": "ok", "Message": "set bio"})
+				return
+			} else if c.Param("setting") == "theme" {
+				primary1 := c.PostForm("primary-1")
+				primary2 := c.PostForm("primary-2")
+				background1 := c.PostForm("background-1")
+				background2 := c.PostForm("background-2")
+
+				primary1 = strings.Replace(primary1, "#", "", 1)
+				primary2 = strings.Replace(primary2, "#", "", 1)
+				background1 = strings.Replace(background1, "#", "", 1)
+				background2 = strings.Replace(background2, "#", "", 1)
+
+				if _, err := hex.DecodeString(primary1); err != nil || len(primary1) != 6 {
+					logger.Error().Err(err).Msg("")
+					html := template.Must(template.ParseFiles("html/htmx/form_feedback.html"))
+					html.ExecuteTemplate(c.Writer, "html/htmx/form_feedback.html", gin.H{"Result": "error", "Message": "invalid color format"})
+					return
+				}
+
+				if _, err := hex.DecodeString(primary2); err != nil || len(primary2) != 6 {
+					logger.Error().Err(err).Msg("")
+					html := template.Must(template.ParseFiles("html/htmx/form_feedback.html"))
+					html.ExecuteTemplate(c.Writer, "html/htmx/form_feedback.html", gin.H{"Result": "error", "Message": "invalid color format"})
+					return
+				}
+
+				if _, err := hex.DecodeString(background1); err != nil || len(background1) != 6 {
+					logger.Error().Err(err).Msg("")
+					html := template.Must(template.ParseFiles("html/htmx/form_feedback.html"))
+					html.ExecuteTemplate(c.Writer, "html/htmx/form_feedback.html", gin.H{"Result": "error", "Message": "invalid color format"})
+					return
+				}
+
+				if _, err := hex.DecodeString(background2); err != nil || len(background2) != 6 {
+					logger.Error().Err(err).Msg("")
+					html := template.Must(template.ParseFiles("html/htmx/form_feedback.html"))
+					html.ExecuteTemplate(c.Writer, "html/htmx/form_feedback.html", gin.H{"Result": "error", "Message": "invalid color format"})
+					return
+				}
+
+				if err := querydb.SetTheme(uid, primary1, primary2, background1, background2); err != nil {
+					logger.Error().Err(err).Msg("")
+					html := template.Must(template.ParseFiles("html/htmx/form_feedback.html"))
+					html.ExecuteTemplate(c.Writer, "html/htmx/form_feedback.html", gin.H{"Result": "error", "Message": "error setting theme"})
+					return
+				}
+
+				html := template.Must(template.ParseFiles("html/htmx/form_feedback.html"))
+				html.ExecuteTemplate(c.Writer, "html/htmx/form_feedback.html", gin.H{"Result": "ok", "Message": "set theme colors"})
 				return
 			}
 		}

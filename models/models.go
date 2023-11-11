@@ -18,6 +18,7 @@ type User struct {
 	Bio            string
 	User_fg_color  string
 	User_bg_color  string
+	Theme          Theme
 	Date_Joined    time.Time
 	Date_formatted string
 }
@@ -85,4 +86,11 @@ type Category struct {
 type Config struct {
 	Registration string
 	Categories   []Category
+}
+
+type Theme struct {
+	Primary1    string
+	Primary2    string
+	Background1 string
+	Background2 string
 }

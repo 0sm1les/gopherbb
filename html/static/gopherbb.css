@@ -1,17 +1,16 @@
+{{ define "html/static/gopherbb.css" }}
+
 :root {
     
-    --primary:black;
-    --primary2:black;
-    --primary3:black;
-    --primary4:black;
+    --primary_text: #{{ .Theme.Primary1 }};
+    --secondary_text: #{{ .Theme.Primary2 }};
 
-    --secondary:white;
-    --secondary2:white;
-    --secondary3:white;
+    --background: #{{ .Theme.Background1 }};
+    --border: #{{ .Theme.Background2 }};
 
     --affirm: rgb(114, 255, 114);
     --danger: rgb(228, 83, 78);
-  }
+}
 
   @font-face {
     font-family: droidsansmono;
@@ -25,64 +24,73 @@
 body {
     margin:0;
     padding:0;
-    background-color: var(--secondary);
+    background-color: var(--background);
 }
 
 html {
    overflow-x: hidden;
-  }
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    color: var(--primary_text);
+}
 
 
 fieldset {
-    border: 1px solid var(--primary3);
+    border: 1px solid var(--border);
 }
 
 label {
-    color: var(--primary2);
+    color: var(--secondary_text);
 }
 
 input,select {
-    background-color: var(--secondary2);
+    background-color: var(--background);
     border: none;
     outline: none;
 }
 
 select {
-    border-bottom: 1px solid var(--primary2);
+    border-bottom: 1px solid var(--border);
 }
 
 select, option {
-    background-color: var(--secondary2);
-    color: var(--primary2);
+    background-color: var(--background);
+    color: var(--secondary_text);
 }
 
 
 input[type="text"],
 input[type="password"] {
     min-width: 16em;
-    border-bottom: 1px solid var(--primary2);
-    color: var(--primary2)
+    border-bottom: 1px solid var(--border);
+    color: var(--secondary_text)
 }
 
 input[type="text"]:active,
 input[type="password"]:active,
 input[type="text"]:focus,
 input[type="password"]:focus {
-    border-bottom: 1px solid var(--primary);
-    color: var(--primary);
+    border-bottom: 1px solid var(--border);
+    color: var(--primary_text);
 }
 
 input[type="submit"] {
     margin-top: 0.5em;
     margin-bottom: 0.5em;
-    color: var(--primary2);
-    box-shadow: 0.1em 0.1em 0 0 var(--primary2);
-    box-shadow: 0.1em 0.1em 0 0 var(--primary2);
+    color: var(--secondary_text);
+    box-shadow: 0.1em 0.1em 0 0 var(--secondary_text);
+    box-shadow: 0.1em 0.1em 0 0 var(--secondary_text);
 }
 
 input[type="submit"]:hover {
-    color: var(--primary);
-    box-shadow: 0.1em 0.1em 0 0 var(--primary);
+    color: var(--primary_text);
+    box-shadow: 0.1em 0.1em 0 0 var(--primary_text);
 }
 
 input[type="submit"]:active {
@@ -99,26 +107,27 @@ select {
 }
 
 button {
-    background-color: var(--secondary2);
-    border-color: var(--primary2);
+    background-color: var(--background);
+    border-color: var(--secondary_text);
     border-width: 0.1em;
-    color: var(--primary2);
+    color: var(--secondary_text);
     padding: 0.3em;
+    border-radius: 5px;
 }
 
 a {
-    color: var(--primary2);
+    color: var(--secondary_text);
     text-decoration: none;
 }
 
 a:hover {
-    color: var(--primary);
-    background-color: var(--primary);
+    color: var(--primary_text);
+    background-color: var(--primary_text);
     background: rgba(0,0,0, 0.1);
 }
 
 legend {
-    color: var(--primary);
+    color: var(--primary_text);
 }
 
 body {
@@ -129,10 +138,9 @@ body {
     position: fixed;
     top:0;
     padding: 0.5em 1em;
-    background-color: var(--secondary2);
+    background-color: var(--background);
     width:100%;
-    border-bottom: 1px solid var(--primary3);
-    /*z-index: -1;*/
+    border-bottom: 1px solid var(--border);
 }
 
 .main-nav h2 {
@@ -192,7 +200,7 @@ body {
   }
 
 .profile .date {
-    color: var(--primary2);
+    color: var(--secondary_text);
 }
 
 .profile .username {
@@ -202,30 +210,30 @@ body {
 .profile .profile_pic {
     width: 200px;
     height: 200px;
-    border: 2px solid var(--primary);
+    border: 2px solid var(--border);
 }
 .profile .contacts {
-    border: 1px solid var(--primary2);
+    border: 1px solid var(--border);
     width: calc(200px + 3px);
 }
 
 .profile .contacts label {
     margin-left:1em;
-    color: var(--primary);
+    color: var(--primary_text);
 }
 .profile .contacts input {
     margin-left:1em;
-    color: var(--primary2);
+    color: var(--secondary_text);
     display: block;
 }
 
 .profile .bio {
-    color: var(--primary);
+    color: var(--secondary_text);
     max-height: 40%;
     display: block;
 }
 .profile .bio pre {
-    border: 1px solid var(--primary);
+    border: 1px solid var(--border);
     height: 100%;
 }
 
@@ -239,7 +247,7 @@ body {
     display: inline-flex;
     padding: 1em;
     margin: 1em;
-    border: 1px solid var(--primary3);
+    border: 1px solid var(--border);
 }
 
 .flex-container-row {
@@ -265,7 +273,7 @@ body {
 }
 
 .editor-container div {
-    border: 1px solid var(--primary3);
+    border: 1px solid var(--border);
 }
 
 .editor-item {
@@ -273,28 +281,16 @@ body {
     padding: 0;
     height: 80vh;
     width: 50%;
-    border: 1px solid var(--secondary3);
+    border: 1px solid var(--border);
     overflow: scroll;
     overflow-wrap: break-word;
 }
-/*
+
 textarea {
-    margin: 0;
-    padding: 1em;
-    border: none;
-    resize: none;
+    color: var(--secondary_text);
     outline: none;
     user-select: none;
-    -webkit-box-shadow: none;
-    -moz-box-shadow: none;
-    box-shadow: none;
-    background-color: var(--secondary2);
-    color: var(--secondary3);
-}
-*/
-textarea {
-    outline: none;
-    user-select: none;
+    background-color: var(--background);
 }
 
 .editor-item textarea {
@@ -307,9 +303,14 @@ textarea {
     height: calc(100% - 2em);
     max-height: calc(100% - 2em);
 }
-.recent-posts div,
-.section-directory div {
-    border: 1px solid var(--primary3);
+
+.recent-posts {
+    color: 1px solid var(--secondary_text)
+}
+
+.recent-posts,
+.section-directory {
+    border: 1px solid var(--border);
     margin-top: 1em;
     margin-bottom: 1em;
     padding: 0;
@@ -317,9 +318,8 @@ textarea {
 
 .recent-posts h2,
 .section-directory h2 {
-    color: var(--primary);
-    border-bottom: 1px solid var(--primary3);
-    background-color: var(--secondary2);
+    border-bottom: 1px solid var(--border);
+    background-color: var(--background);
     padding: 0.2em 0.5em;
     margin-top: 0;
     margin-bottom: 0;
@@ -327,7 +327,7 @@ textarea {
 
 .section-directory span {
     float: right;
-    color: var(--primary3);
+    color: var(--secondary_text);
 }
 
 .section-directory a {
@@ -343,21 +343,20 @@ textarea {
 .dropdown-content {
     display: none;
     position: absolute;
-    background-color: var(--secondary2);
+    background-color: var(--background);
     min-width: fit-content;
     box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
-    /*z-index: 1;*/
   }
   
 .dropdown-content a {
-    color: var(--primary2);
+    color: var(--secondary_text);
     font-size: smaller;
     text-decoration: none;
     display: block;
   }
   
 .dropdown-content a:hover {
-    color: var(--primary);
+    color: var(--primary_text);
 }
   
 .dropdown:hover .dropdown-content {
@@ -371,17 +370,9 @@ textarea {
     padding: 0;
 }
 
-.post-container h2 {
-    color: var(--primary);
-}
-
-.post-container button {
-    background-color: var(--secondary);
-}
-
 .recent-posts,
 .post-listing {
-    border-bottom:1px solid var(--primary3);
+    border-bottom:1px solid var(--border);
     padding: 0.2em 0.5em;
 }
 
@@ -393,19 +384,11 @@ textarea {
     padding: 0;
 }
 
-.post-listing h3 {
-    color: var(--primary2);
-}
-
-.post-listing h5 {
-    color: var(--primary3)
-}
-
 .recent-posts {
-    border: 1px solid var(--primary3);
+    border: 1px solid var(--border);
 }
 .recent-posts h5 {
-    border-bottom: 1px solid var(--primary2);
+    border-bottom: 1px solid var(--border);
 }
 
 .recent-post-container {
@@ -415,7 +398,7 @@ textarea {
 
 
 .post {
-    border: 1px solid var(--primary3);
+    border: 1px solid var(--border);
     margin-top: 1em;
     margin-bottom: 1em;
     padding: 0;
@@ -435,22 +418,27 @@ textarea {
 .post h4,
 .post h5,
 .post h6 {
-    color: var(--primary);
+    color: var(--primary_text);
 }
 
 .post p,
 .post li {
-    color: var(--primary2);
+    color: var(--secondary_text);
 }
 
 .post strong,
 .post em {
-    color: var(--primary);
+    color: var(--primary_text);
+}
+
+.credit {
+    color: var(--secondary_text);
+    font-size: smaller;
 }
 
 hr {
     width: calc(100% - 1em);
-    color: var(--primary3);
+    color: var(--secondary_text);
 }
 
 .section-header hr {
@@ -463,8 +451,8 @@ hr {
 
 
 pre {
-    color: var(--primary4);
-    background-color: var(--secondary2);
+    color: var(--secondary_text);
+    background-color: var(--background);
     padding: 0.5em;
     overflow: scroll;
 }
@@ -479,8 +467,6 @@ pre {
     margin-bottom: 0;
     padding-top: 0;
     padding-bottom: 0;
-
-    color: var(--primary);
 }
 
 .thread-container .post {
@@ -493,7 +479,7 @@ pre {
 }
 .settings textarea,
 .reply textarea {
-    border: 1px solid var(--primary);
+    border: 1px solid var(--border);
     width: 100%;
     box-sizing: border-box;
     display: block;
@@ -503,9 +489,8 @@ pre {
     display: inline;
 }
 
-.notification div,
-.notification h2 {
-    color: var(--primary);
+.notification div {
+    color: var(--primary_text);
 
 }
 
@@ -517,10 +502,6 @@ pre {
     float: right;
     position: relative;
     margin: 0;
-}
-
-.search h1 {
-    color: var(--primary);
 }
 
 footer {
@@ -561,3 +542,5 @@ footer {
     margin-left: 3.5em;
     margin-right: 3.5em;
 }
+
+{{ end }}

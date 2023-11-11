@@ -2,7 +2,6 @@ package querydb
 
 import (
 	"context"
-	"errors"
 	"fmt"
 
 	"github.com/0sm1les/gopherbb/models"
@@ -48,7 +47,8 @@ func Authenticate(user models.Username, hash models.Hash) (int32, error) {
 func Userinfo(user_id int32) (models.User, error) {
 	var userinfo models.User
 
-	err := dbpool.QueryRow(context.Background(), "SELECT id, role, profile_pic, username ,password, bio, user_fg_color, user_bg_color, date_joined FROM users WHERE id = $1", user_id).Scan(
+	err := dbpool.QueryRow(context.Background(), "SELECT id, role, profile_pic, username ,password, bio, user_fg_color, user_bg_color,"+
+		" custom_primary_1, custom_primary_2, custom_background_1, custom_background_2, date_joined FROM users WHERE id = $1", user_id).Scan(
 		&userinfo.Id,
 		&userinfo.Role,
 		&userinfo.Profile_pic,
@@ -57,12 +57,16 @@ func Userinfo(user_id int32) (models.User, error) {
 		&userinfo.Bio,
 		&userinfo.User_fg_color,
 		&userinfo.User_bg_color,
+		&userinfo.Theme.Primary1,
+		&userinfo.Theme.Primary2,
+		&userinfo.Theme.Background1,
+		&userinfo.Theme.Background2,
 		&userinfo.Date_Joined,
 	)
 	if err != nil {
 		return userinfo, err
 	}
-
+	fmt.Println(userinfo)
 	return userinfo, nil
 }
 
@@ -71,16 +75,29 @@ func SetBio(user_id int32, bio string) error {
 	return err
 }
 
-func SetColor(user_id int32, elm string, hex string) error {
-	if elm == "fg" {
-		_, err := dbpool.Exec(context.Background(), "UPDATE users SET user_fg_color = $1 WHERE id = $2", hex, user_id)
-		return err
-	} else if elm == "bg" {
-		_, err := dbpool.Exec(context.Background(), "UPDATE users SET user_bg_color = $1 WHERE id = $2", hex, user_id)
-		return err
-	} else {
-		return errors.New("invalid attribute")
-	}
+func SetColor(user_id int32, fg string, bg string) error {
+	_, err := dbpool.Exec(context.Background(), "UPDATE users SET user_fg_color = $1, user_bg_color = $2 WHERE id = $3", fg, bg, user_id)
+	return err
+}
+
+func SetTheme(user_id int32, primary1 string, primary2 string, background1 string, background2 string) error {
+	_, err := dbpool.Exec(context.Background(), "UPDATE users SET custom_primary_1 = $1, custom_primary_2 = $2, custom_background_1 = $3, custom_background_2 = $4 WHERE id = $5",
+		primary1,
+		primary2,
+		background1,
+		background2,
+		user_id)
+	return err
+}
+
+func GetTheme(user_id int32) (models.Theme, error) {
+	var theme models.Theme
+	err := dbpool.QueryRow(context.Background(), "SELECT custom_primary_1, custom_primary_2, custom_background_1, custom_background_2 from users WHERE id = $1", user_id).Scan(
+		&theme.Primary1,
+		&theme.Primary2,
+		&theme.Background1,
+		&theme.Background2)
+	return theme, err
 }
 
 func SetPFP(user_id int32, filename string) error {

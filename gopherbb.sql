@@ -9,6 +9,10 @@ CREATE TABLE users (
     bio varchar(255) DEFAULT '' NOT NULL,
     user_fg_color varchar(6) DEFAULT '000000' NOT NULL,
     user_bg_color varchar(6) DEFAULT '000000' NOT NULL,
+    custom_primary_1 varchar(6) DEFAULT '000000' NOT NULL,
+    custom_primary_2 varchar(6) DEFAULT '000000' NOT NULL,
+    custom_background_1 varchar(6) DEFAULT 'ffffff' NOT NULL,
+    custom_background_2 varchar(6) DEFAULT 'ffffff' NOT NULL,
     date_joined timestamp without time zone NOT NULL
 );
 

@@ -66,3 +66,7 @@ The default user name colors can be changed by editing the user table in gopherb
 ## TODO
 - break up main
 - refine css for chrome
+
+#f1c232 #bbbbbb
+
+#332764 #121830
