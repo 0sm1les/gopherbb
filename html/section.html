@@ -3,15 +3,15 @@
 <div class="center-x">
     <div class="flex-container post-container">
         <div class="section-header">
-            <h2>{{ .Section }}</h2>
-            <button hx-get="/section/{{ .Section }}/newest" hx-swap="innerHTML" hx-target="#post-listing">newest</button>
-            <button hx-get="/section/{{ .Section }}/mostliked" hx-swap="innerHTML" hx-target="#post-listing">most liked</button>
+            <h2>{{ .Section.Section }}</h2>
+            <button hx-get="/section/{{ .Section.Id }}/newest" hx-swap="innerHTML" hx-target="#post-listing">newest</button>
+            <button hx-get="/section/{{ .Section.Id }}/mostliked" hx-swap="innerHTML" hx-target="#post-listing">most liked</button>
             {{ if .Logged_in }}
             <a href="/editor">new post</a>
             {{ end }}
             <hr>
         </div>
-        <div id="post-listing" hx-get="/section/{{ .Section }}/newest" hx-trigger="load">
+        <div id="post-listing" hx-get="/section/{{ .Section.Id }}/newest" hx-trigger="load">
         </div>
     </div>
 </div>

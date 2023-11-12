@@ -85,12 +85,13 @@ type Category struct {
 
 type Config struct {
 	Registration string
+	Theme        Theme
 	Categories   []Category
 }
 
 type Theme struct {
-	Primary1    string
-	Primary2    string
-	Background1 string
-	Background2 string
+	Primary_text   string
+	Secondary_text string
+	Background     string
+	Border         string
 }

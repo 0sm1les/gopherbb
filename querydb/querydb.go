@@ -48,7 +48,7 @@ func Userinfo(user_id int32) (models.User, error) {
 	var userinfo models.User
 
 	err := dbpool.QueryRow(context.Background(), "SELECT id, role, profile_pic, username ,password, bio, user_fg_color, user_bg_color,"+
-		" custom_primary_1, custom_primary_2, custom_background_1, custom_background_2, date_joined FROM users WHERE id = $1", user_id).Scan(
+		" custom_primary_text_color, custom_secondary_text_color, custom_background_color, custom_border_color, date_joined FROM users WHERE id = $1", user_id).Scan(
 		&userinfo.Id,
 		&userinfo.Role,
 		&userinfo.Profile_pic,
@@ -57,16 +57,15 @@ func Userinfo(user_id int32) (models.User, error) {
 		&userinfo.Bio,
 		&userinfo.User_fg_color,
 		&userinfo.User_bg_color,
-		&userinfo.Theme.Primary1,
-		&userinfo.Theme.Primary2,
-		&userinfo.Theme.Background1,
-		&userinfo.Theme.Background2,
+		&userinfo.Theme.Primary_text,
+		&userinfo.Theme.Secondary_text,
+		&userinfo.Theme.Background,
+		&userinfo.Theme.Border,
 		&userinfo.Date_Joined,
 	)
 	if err != nil {
 		return userinfo, err
 	}
-	fmt.Println(userinfo)
 	return userinfo, nil
 }
 
@@ -80,23 +79,23 @@ func SetColor(user_id int32, fg string, bg string) error {
 	return err
 }
 
-func SetTheme(user_id int32, primary1 string, primary2 string, background1 string, background2 string) error {
-	_, err := dbpool.Exec(context.Background(), "UPDATE users SET custom_primary_1 = $1, custom_primary_2 = $2, custom_background_1 = $3, custom_background_2 = $4 WHERE id = $5",
-		primary1,
-		primary2,
-		background1,
-		background2,
+func SetTheme(user_id int32, primary_text string, secondary_text string, background string, border string) error {
+	_, err := dbpool.Exec(context.Background(), "UPDATE users SET custom_primary_text_color = $1, custom_secondary_text_color = $2, custom_background_color = $3, custom_border_color = $4 WHERE id = $5",
+		primary_text,
+		secondary_text,
+		background,
+		border,
 		user_id)
 	return err
 }
 
 func GetTheme(user_id int32) (models.Theme, error) {
 	var theme models.Theme
-	err := dbpool.QueryRow(context.Background(), "SELECT custom_primary_1, custom_primary_2, custom_background_1, custom_background_2 from users WHERE id = $1", user_id).Scan(
-		&theme.Primary1,
-		&theme.Primary2,
-		&theme.Background1,
-		&theme.Background2)
+	err := dbpool.QueryRow(context.Background(), "SELECT custom_primary_text_color, custom_secondary_text_color, custom_background_color, custom_border_color from users WHERE id = $1", user_id).Scan(
+		&theme.Primary_text,
+		&theme.Secondary_text,
+		&theme.Background,
+		&theme.Border)
 	return theme, err
 }
 
@@ -186,7 +185,7 @@ func UpdatePostStatus(post_id int32, status string) error {
 
 func GetSectionPosts(section string) ([]models.PostListing, error) {
 	var posts []models.PostListing
-	results, err := dbpool.Query(context.Background(), "SELECT id, poster, title, time_posted FROM posts WHERE status = $1 AND section = $2", "posted", section)
+	results, err := dbpool.Query(context.Background(), "SELECT id, poster, title, time_posted FROM posts WHERE status = $1 AND section = $2 ORDER BY id DESC", "posted", section)
 	if err != nil {
 		return nil, err
 	}
@@ -397,7 +396,6 @@ ON like_data.post = posts.id WHERE section = $1 ORDER BY like_count DESC;`
 		if err != nil {
 			return nil, err
 		}
-		//fmt.Println(like_count, post)
 		posts = append(posts, post)
 	}
 	return posts, nil

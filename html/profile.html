@@ -21,7 +21,7 @@
                 {{ range .RecentPosts }}
                 <div class="post-listing">
                     <h3><a href="/section/{{ .Section }}/{{ .Pid }}/{{ .Title }}">{{ .Title }}</a></h3>
-                    <h5>By:<span style="color: #{{ .User.User_fg_color }}; text-shadow: 1px 1px 5px #{{ .User.User_bg_color }};" >{{ .User.Username }}</span> On:{{ .Time_formatted }}</h5>
+                    <div class="credit">By:<span style="color: #{{ .User.User_fg_color }}; text-shadow: 1px 1px 5px #{{ .User.User_bg_color }};" >{{ .User.Username }}</span> On:{{ .Time_formatted }}</div>
                 </div>
                 {{ end }}
                 <a href="/user/{{ .Userinfo.Username }}/posts">View all</a>

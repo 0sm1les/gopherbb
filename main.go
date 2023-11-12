@@ -32,11 +32,9 @@ import (
 
 var store = sessions.NewCookieStore([]byte(os.Getenv("gopherbb_cookie_key")))
 
-var Categories []models.Category
-
 var Sections = make(map[string]string)
 
-var Registration string
+var config models.Config
 
 var md = goldmark.New(goldmark.WithExtensions(extension.GFM,
 	highlighting.NewHighlighting(highlighting.WithStyle("monokai"))))
@@ -127,7 +125,6 @@ func main() {
 
 	router.Static("/pictures", "html/user_pictures")
 	router.LoadHTMLGlob("./html/*.html")
-	//router.StaticFile("/gopherbb.css", "./html/static/gopherbb.css")
 	router.StaticFile("/DroidSansMono.ttf", "./html/static/DroidSansMono.ttf")
 	router.LoadHTMLFiles("./html/static/gopherbb.css")
 
@@ -186,17 +183,13 @@ func readConf(conf_file string) {
 	if err != nil {
 		log.Fatal().Err(err)
 	}
-	var conf models.Config
-	err = json.Unmarshal(data, &conf)
+	err = json.Unmarshal(data, &config)
 	if err != nil {
 		log.Fatal().Err(err)
 	}
-
-	Registration = conf.Registration
-	Categories = conf.Categories
-	for i := 0; i < len(Categories); i++ {
-		for j := 0; j < len(Categories[i].Sections); j++ {
-			Sections[Categories[i].Sections[j].Id] = Categories[i].Sections[j].Section
+	for i := 0; i < len(config.Categories); i++ {
+		for j := 0; j < len(config.Categories[i].Sections); j++ {
+			Sections[config.Categories[i].Sections[j].Id] = config.Categories[i].Sections[j].Section
 		}
 	}
 }
@@ -247,33 +240,23 @@ func deauthsession(user_id int32, c *gin.Context) error {
 }
 
 func css(c *gin.Context) {
-	/*
-		primary1 := template.CSS("red")
-		primary2 := template.CSS("red")
-
-		background1 := template.CSS("black")
-		background2 := template.CSS("black")
-	*/
-	c.Header("Content-Type", "text/css; charset=utf-8")
-	css := template.Must(template.ParseFiles("html/static/gopherbb.css"))
-	/*
-		err := css.ExecuteTemplate(c.Writer, "html/static/gopherbb.css", gin.H{"Primary1": primary1, "Primary2": primary2, "Background1": background1, "Background2": background2})
-		if err != nil {
-			fmt.Println(err)
-		}
-	*/
 	initsession(c)
 	session, _ := store.Get(c.Request, "session")
 	uid := session.Values["id"].(int32)
+
+	c.Header("Content-Type", "text/css; charset=utf-8")
+	css := template.Must(template.ParseFiles("html/static/gopherbb.css"))
+
 	if uid != -1 {
 		theme, err := querydb.GetTheme(uid)
 		if err != nil {
 			logger.Error().Err(err).Msg("")
+			css.ExecuteTemplate(c.Writer, "html/static/gopherbb.css", gin.H{"Theme": config.Theme})
+			return
 		}
 		css.ExecuteTemplate(c.Writer, "html/static/gopherbb.css", gin.H{"Theme": theme})
-		return
 	} else {
-
+		css.ExecuteTemplate(c.Writer, "html/static/gopherbb.css", gin.H{"Theme": config.Theme})
 	}
 }
 
@@ -298,12 +281,12 @@ func index(c *gin.Context) {
 		userinfo, _ := querydb.Userinfo(uid)
 		html := template.Must(template.ParseFiles("html/auth_header.html", "html/index.html", "html/footer.html"))
 		html.ExecuteTemplate(c.Writer, "html/auth_header.html", gin.H{"Title": "Index", "Userinfo": userinfo})
-		html.ExecuteTemplate(c.Writer, "html/index.html", gin.H{"Categories": Categories, "Recentposts": recentPosts})
+		html.ExecuteTemplate(c.Writer, "html/index.html", gin.H{"Categories": config.Categories, "Recentposts": recentPosts})
 		html.ExecuteTemplate(c.Writer, "html/footer.html", nil)
 	} else {
 		html := template.Must(template.ParseFiles("html/unauth_header.html", "html/index.html", "html/footer.html"))
-		html.ExecuteTemplate(c.Writer, "html/unauth_header.html", gin.H{"Title": "Index", "Registration": Registration})
-		html.ExecuteTemplate(c.Writer, "html/index.html", gin.H{"Categories": Categories, "Recentposts": recentPosts})
+		html.ExecuteTemplate(c.Writer, "html/unauth_header.html", gin.H{"Title": "Index", "Registration": config.Registration})
+		html.ExecuteTemplate(c.Writer, "html/index.html", gin.H{"Categories": config.Categories, "Recentposts": recentPosts})
 		html.ExecuteTemplate(c.Writer, "html/footer.html", nil)
 	}
 }
@@ -315,8 +298,8 @@ func login(c *gin.Context) {
 	if uid == -1 {
 		if c.Request.Method == "GET" {
 			html := template.Must(template.ParseFiles("html/unauth_header.html", "html/login.html", "html/footer.html"))
-			html.ExecuteTemplate(c.Writer, "html/unauth_header.html", gin.H{"Title": "Login", "Registration": Registration})
-			html.ExecuteTemplate(c.Writer, "html/login.html", gin.H{"Registration": Registration})
+			html.ExecuteTemplate(c.Writer, "html/unauth_header.html", gin.H{"Title": "Login", "Registration": config.Registration})
+			html.ExecuteTemplate(c.Writer, "html/login.html", gin.H{"Registration": config.Registration})
 			html.ExecuteTemplate(c.Writer, "html/footer.html", nil)
 		} else if c.Request.Method == "POST" {
 			username := c.PostForm("username")
@@ -344,8 +327,8 @@ func login(c *gin.Context) {
 			}
 			if len(inputErrors) != 0 {
 				html := template.Must(template.ParseFiles("html/unauth_header.html", "html/login.html", "html/footer.html"))
-				html.ExecuteTemplate(c.Writer, "html/unauth_header.html", gin.H{"Title": "Login", "Registration": Registration})
-				html.ExecuteTemplate(c.Writer, "html/login.html", gin.H{"Errors": []string{"Incorrect username/password."}, "Registration": Registration})
+				html.ExecuteTemplate(c.Writer, "html/unauth_header.html", gin.H{"Title": "Login", "Registration": config.Registration})
+				html.ExecuteTemplate(c.Writer, "html/login.html", gin.H{"Errors": []string{"Incorrect username/password."}, "Registration": config.Registration})
 				html.ExecuteTemplate(c.Writer, "html/footer.html", nil)
 			}
 
@@ -357,10 +340,10 @@ func register(c *gin.Context) {
 	initsession(c)
 	session, _ := store.Get(c.Request, "session")
 	uid := session.Values["id"].(int32)
-	if uid == -1 && Registration == "open" {
+	if uid == -1 && config.Registration == "open" {
 		if c.Request.Method == "GET" {
 			html := template.Must(template.ParseFiles("html/unauth_header.html", "html/register.html", "html/footer.html"))
-			html.ExecuteTemplate(c.Writer, "html/unauth_header.html", gin.H{"Title": "Register", "Registration": Registration})
+			html.ExecuteTemplate(c.Writer, "html/unauth_header.html", gin.H{"Title": "Register", "Registration": config.Registration})
 			html.ExecuteTemplate(c.Writer, "html/register.html", nil)
 			html.ExecuteTemplate(c.Writer, "html/footer.html", nil)
 		} else if c.Request.Method == "POST" {
@@ -390,7 +373,7 @@ func register(c *gin.Context) {
 						return
 					}
 					html := template.Must(template.ParseFiles("html/unauth_header.html", "html/login.html", "html/footer.html"))
-					html.ExecuteTemplate(c.Writer, "html/unauth_header.html", gin.H{"Title": "Login", "Registration": Registration})
+					html.ExecuteTemplate(c.Writer, "html/unauth_header.html", gin.H{"Title": "Login", "Registration": config.Registration})
 					html.ExecuteTemplate(c.Writer, "html/login.html", nil)
 					html.ExecuteTemplate(c.Writer, "html/footer.html", nil)
 					return
@@ -399,7 +382,7 @@ func register(c *gin.Context) {
 				}
 			}
 			html := template.Must(template.ParseFiles("html/unauth_header.html", "html/register.html", "html/footer.html"))
-			html.ExecuteTemplate(c.Writer, "html/unauth_header.html", gin.H{"Title": "Register", "Registration": Registration})
+			html.ExecuteTemplate(c.Writer, "html/unauth_header.html", gin.H{"Title": "Register", "Registration": config.Registration})
 			html.ExecuteTemplate(c.Writer, "html/register.html", gin.H{"Errors": inputErrors})
 			html.ExecuteTemplate(c.Writer, "html/footer.html", nil)
 
@@ -461,7 +444,7 @@ func profile(c *gin.Context) {
 			html.ExecuteTemplate(c.Writer, "html/footer.html", nil)
 		} else {
 			html := template.Must(template.ParseFiles("html/unauth_header.html", "html/profile.html", "html/footer.html"))
-			html.ExecuteTemplate(c.Writer, "html/unauth_header.html", gin.H{"Title": other_userinfo.Username, "Registration": Registration})
+			html.ExecuteTemplate(c.Writer, "html/unauth_header.html", gin.H{"Title": other_userinfo.Username, "Registration": config.Registration})
 			html.ExecuteTemplate(c.Writer, "html/profile.html", gin.H{"Userinfo": other_userinfo, "RecentPosts": posts})
 			html.ExecuteTemplate(c.Writer, "html/footer.html", nil)
 		}
@@ -636,7 +619,7 @@ func editor(c *gin.Context) {
 		if c.Param("id") == "" {
 			html := template.Must(template.ParseFiles("html/auth_header.html", "html/editor.html", "html/footer.html"))
 			html.ExecuteTemplate(c.Writer, "html/auth_header.html", gin.H{"Title": "editor", "Userinfo": userinfo})
-			html.ExecuteTemplate(c.Writer, "html/editor.html", gin.H{"Categories": Categories})
+			html.ExecuteTemplate(c.Writer, "html/editor.html", gin.H{"Categories": config.Categories})
 			html.ExecuteTemplate(c.Writer, "html/footer.html", nil)
 			return
 		} else {
@@ -662,7 +645,7 @@ func editor(c *gin.Context) {
 
 			html := template.Must(template.ParseFiles("html/auth_header.html", "html/editor.html", "html/footer.html"))
 			html.ExecuteTemplate(c.Writer, "html/auth_header.html", gin.H{"Title": "editor", "Userinfo": userinfo})
-			html.ExecuteTemplate(c.Writer, "html/editor.html", gin.H{"Postinfo": postinfo, "PostHTML": postHTML, "Categories": Categories})
+			html.ExecuteTemplate(c.Writer, "html/editor.html", gin.H{"Postinfo": postinfo, "PostHTML": postHTML, "Categories": config.Categories})
 			html.ExecuteTemplate(c.Writer, "html/footer.html", nil)
 			return
 		}
@@ -897,7 +880,7 @@ func section(c *gin.Context) {
 	session, _ := store.Get(c.Request, "session")
 	uid := session.Values["id"].(int32)
 
-	section, err := validateSection(c.Param("section"))
+	sectioninfo, err := validateSection(c.Param("section"))
 	if err != nil {
 		logger.Error().Err(err).Msg("")
 		return
@@ -910,13 +893,13 @@ func section(c *gin.Context) {
 		}
 
 		html := template.Must(template.ParseFiles("html/auth_header.html", "html/section.html", "html/footer.html"))
-		html.ExecuteTemplate(c.Writer, "html/auth_header.html", gin.H{"Title": section.Section, "Userinfo": userinfo})
-		html.ExecuteTemplate(c.Writer, "html/section.html", gin.H{"Section": section.Id, "Logged_in": true})
+		html.ExecuteTemplate(c.Writer, "html/auth_header.html", gin.H{"Title": sectioninfo.Section, "Userinfo": userinfo})
+		html.ExecuteTemplate(c.Writer, "html/section.html", gin.H{"Section": sectioninfo, "Logged_in": true})
 		html.ExecuteTemplate(c.Writer, "html/footer.html", nil)
 	} else {
 		html := template.Must(template.ParseFiles("html/unauth_header.html", "html/section.html", "html/footer.html"))
-		html.ExecuteTemplate(c.Writer, "html/unauth_header.html", gin.H{"Title": section.Section, "Registration": Registration})
-		html.ExecuteTemplate(c.Writer, "html/section.html", gin.H{"Section": section.Id, "Logged_in": false})
+		html.ExecuteTemplate(c.Writer, "html/unauth_header.html", gin.H{"Title": sectioninfo.Section, "Registration": config.Registration})
+		html.ExecuteTemplate(c.Writer, "html/section.html", gin.H{"Section": sectioninfo, "Logged_in": false})
 		html.ExecuteTemplate(c.Writer, "html/footer.html", nil)
 	}
 }
@@ -982,7 +965,7 @@ func viewPost(c *gin.Context) {
 
 	} else {
 		html := template.Must(template.ParseFiles("html/unauth_header.html", "html/post.html", "html/footer.html"))
-		html.ExecuteTemplate(c.Writer, "html/unauth_header.html", gin.H{"Title": postinfo.Title, "Registration": Registration})
+		html.ExecuteTemplate(c.Writer, "html/unauth_header.html", gin.H{"Title": postinfo.Title, "Registration": config.Registration})
 		html.ExecuteTemplate(c.Writer, "html/post.html", gin.H{"Postinfo": postinfo,
 			"Comments":  comments,
 			"Liked":     false,
@@ -1188,7 +1171,7 @@ func search(c *gin.Context) {
 			return
 		} else {
 			html := template.Must(template.ParseFiles("html/unauth_header.html", "html/search.html", "html/footer.html"))
-			html.ExecuteTemplate(c.Writer, "html/unauth_header.html", gin.H{"Title": "search", "Registration": Registration})
+			html.ExecuteTemplate(c.Writer, "html/unauth_header.html", gin.H{"Title": "search", "Registration": config.Registration})
 			html.ExecuteTemplate(c.Writer, "html/search.html", nil)
 			html.ExecuteTemplate(c.Writer, "html/footer.html", nil)
 			return

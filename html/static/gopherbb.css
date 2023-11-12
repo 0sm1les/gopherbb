@@ -2,11 +2,11 @@
 
 :root {
     
-    --primary_text: #{{ .Theme.Primary1 }};
-    --secondary_text: #{{ .Theme.Primary2 }};
+    --primary_text: #{{ .Theme.Primary_text }};
+    --secondary_text: #{{ .Theme.Secondary_text }};
 
-    --background: #{{ .Theme.Background1 }};
-    --border: #{{ .Theme.Background2 }};
+    --background: #{{ .Theme.Background }};
+    --border: #{{ .Theme.Border }};
 
     --affirm: rgb(114, 255, 114);
     --danger: rgb(228, 83, 78);
@@ -310,10 +310,14 @@ textarea {
 
 .recent-posts,
 .section-directory {
-    border: 1px solid var(--border);
+    padding: 0;
+}
+
+.section-directory .flex-container {
     margin-top: 1em;
     margin-bottom: 1em;
-    padding: 0;
+    border: 1px solid var(--border);
+
 }
 
 .recent-posts h2,

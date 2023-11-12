@@ -17,7 +17,13 @@ gopherbb_console_log
 ## config example
 ```
 {
-  "Registration": "closed",
+  "Registration": "open",
+  "Theme": {
+    "Primary_text": "000000",
+    "Secondary_text": "000000",
+    "Background": "ffffff",
+    "Border": "000000"
+  },
   "Categories": [
  {
   "Category": "general",
@@ -57,16 +63,7 @@ gopherbb_console_log
 }
 ```
 
-## changing theme
-The theme can be easily adjusted by changing the 7 color variables in the css file in the static folder, by default the website is just white and black.
-
-## changing default username color
-The default user name colors can be changed by editing the user table in gopherbb.sql, default username colors are black.
-
 ## TODO
 - break up main
 - refine css for chrome
-
-#f1c232 #bbbbbb
-
-#332764 #121830
+- refine css for mobile platforms
