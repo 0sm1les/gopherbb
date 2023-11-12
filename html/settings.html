@@ -35,16 +35,16 @@
         <form hx-post="/user/settings/theme" hx-swap="innerHTML" hx-target="#theme-form-feedback">
             <fieldset>
                 <legend>custom theme</legend>
-                <label>Primary 1
+                <label>Header color
                     <input name="primary-1" type="color" value="#{{ .Userinfo.Theme.Primary_text }}">
                 </label>
-                <label>Primary 2
+                <label>text color
                     <input name="primary-2" type="color" value="#{{ .Userinfo.Theme.Secondary_text }}">
                 </label>
-                <label>background 1
+                <label>background color
                     <input name="background-1" type="color" value="#{{ .Userinfo.Theme.Background }}">
                 </label>
-                <label>background 2
+                <label>border color
                     <input name="background-2" type="color" value="#{{ .Userinfo.Theme.Border }}">
                 </label>
                 <button>set</button>
