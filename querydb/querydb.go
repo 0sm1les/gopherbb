@@ -134,9 +134,19 @@ func GetPost(post_id int32) (models.Post, error) {
 	return post, err
 }
 
+func GetPostMD(post_id int32) (models.Post, error) {
+	var post models.Post
+	err := dbpool.QueryRow(context.Background(), "SELECT id, poster, title, time_posted, md FROM posts WHERE id = $1", post_id).Scan(&post.Pid,
+		&post.Uid,
+		&post.Title,
+		&post.Time_posted,
+		&post.Md)
+	return post, err
+}
+
 func UserPosts(user_id int32, status string) ([]models.PostListing, error) {
 	var posts []models.PostListing
-	results, err := dbpool.Query(context.Background(), "SELECT id, title, section,time_posted FROM posts WHERE poster = $1 AND status = $2", user_id, status)
+	results, err := dbpool.Query(context.Background(), "SELECT id, title, section,time_posted FROM posts WHERE poster = $1 AND status = $2 ORDER BY id DESC", user_id, status)
 	if err != nil {
 		return nil, err
 	}

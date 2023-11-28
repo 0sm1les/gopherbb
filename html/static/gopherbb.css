@@ -494,7 +494,7 @@ pre {
 }
 
 .notification div {
-    color: var(--primary_text);
+    color: var(--secondary_text);
 
 }
 
@@ -545,6 +545,11 @@ footer {
     margin-top: 1em;
     margin-left: 3.5em;
     margin-right: 3.5em;
+}
+
+.draft-delete {
+    float: right;
+    font-size: smaller;
 }
 
 {{ end }}

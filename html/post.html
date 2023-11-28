@@ -20,6 +20,7 @@
                 {{ if .Editable }}
                 <button><a href="/editor/{{ .Postinfo.Pid }}">edit</a></button>
                 {{ end }}
+                <button><a href="/raw/{{ .Postinfo.Pid }}/{{ .Postinfo.Title }}" target="_blank">raw</a></button>
             </div>
             <div id="post-{{ .Postinfo.Pid }}" class="reply"></div>
             {{ end }}

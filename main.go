@@ -169,6 +169,8 @@ func main() {
 	router.GET("/reply/:pid", reply)
 	router.POST("/reply/:pid", reply)
 
+	router.GET("/raw/:pid/:title", rawMD)
+
 	router.GET("/like/:pid", like)
 
 	router.Run("localhost:8080")
@@ -1227,7 +1229,12 @@ func deletePost(c *gin.Context) {
 				logger.Error().Err(err).Msg("")
 				return
 			}
-			c.Header("HX-Redirect", fmt.Sprintf("/user/%s/posts", userlisted.Username))
+
+			if strings.Contains(c.Request.Referer(), "/user/drafts") {
+				c.Header("HX-refresh", "true")
+			} else {
+				c.Header("HX-Redirect", fmt.Sprintf("/user/%s/posts", userlisted.Username))
+			}
 		}
 	}
 }
@@ -1308,4 +1315,33 @@ func newest(c *gin.Context) {
 
 	html := template.Must(template.ParseFiles("html/htmx/results.html"))
 	html.ExecuteTemplate(c.Writer, "html/htmx/results.html", gin.H{"Posts": posts, "Section": section.Id})
+}
+
+func rawMD(c *gin.Context) {
+	initsession(c)
+	session, _ := store.Get(c.Request, "session")
+	uid := session.Values["id"].(int32)
+	if uid != -1 {
+		pid, err := strconv.ParseInt(c.Param("pid"), 10, 32)
+		if err != nil {
+			return
+		}
+		postinfo, err := querydb.GetPostMD(int32(pid))
+		if err != nil {
+			return
+		}
+
+		userinfo, _ := querydb.Userinfo(postinfo.Uid)
+
+		timeposted := formattedTime(postinfo.Time_posted)
+
+		credit := fmt.Sprintf("----------\nauthor: %s\ntitle: %s\ndate posted: %s\noriginal link: %s\n----------\n\n", userinfo.Username,
+			postinfo.Title,
+			timeposted,
+			c.Request.Referer())
+
+		mdfile := credit + postinfo.Md
+
+		c.String(200, mdfile)
+	}
 }

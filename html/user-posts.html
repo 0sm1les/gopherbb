@@ -12,6 +12,7 @@
     <div class="post-listing">
         {{ if eq .Status "draft" }}
         <h3><a href="/editor/{{ .Pid }}">{{ .Title }}</a></h3>
+        <a class="draft-delete" hx-get="/delete/post/{{ .Pid }}" hx-swap="none" hx-confirm="are you sure you want to delete '{{ .Title }}'">delete</a>
         {{ else }}
         <h3><a href="/section/{{ .Section }}/{{ .Pid }}/{{ .Title }}">{{ .Title }}</a></h3>
         {{ end }}
